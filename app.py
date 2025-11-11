@@ -8,8 +8,10 @@ import json
 import re
 from werkzeug.utils import secure_filename
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 import shutil
+import time
+from threading import Thread
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-here'
@@ -49,12 +51,162 @@ def cleanup_session_files():
         if os.path.exists(session_output_dir):
             shutil.rmtree(session_output_dir)
 
+def cleanup_old_files(hours=24):
+    """Clean up files and directories older than specified hours"""
+    cutoff_time = time.time() - (hours * 3600)
+    cleaned = {'uploads': 0, 'outputs': 0, 'sessions': 0}
+    
+    # Clean old upload directories
+    for session_dir in os.listdir(app.config['UPLOAD_FOLDER']):
+        dir_path = os.path.join(app.config['UPLOAD_FOLDER'], session_dir)
+        if os.path.isdir(dir_path) and os.path.getmtime(dir_path) < cutoff_time:
+            try:
+                shutil.rmtree(dir_path)
+                cleaned['uploads'] += 1
+                logger.info(f"Cleaned old upload directory: {session_dir}")
+            except Exception as e:
+                logger.error(f"Error cleaning upload directory {session_dir}: {e}")
+    
+    # Clean old output directories
+    for session_dir in os.listdir(app.config['OUTPUT_FOLDER']):
+        dir_path = os.path.join(app.config['OUTPUT_FOLDER'], session_dir)
+        if os.path.isdir(dir_path) and os.path.getmtime(dir_path) < cutoff_time:
+            try:
+                shutil.rmtree(dir_path)
+                cleaned['outputs'] += 1
+                logger.info(f"Cleaned old output directory: {session_dir}")
+            except Exception as e:
+                logger.error(f"Error cleaning output directory {session_dir}: {e}")
+    
+    # Clean old flask session files
+    session_dir = 'flask_session'
+    if os.path.exists(session_dir):
+        for session_file in os.listdir(session_dir):
+            file_path = os.path.join(session_dir, session_file)
+            if os.path.isfile(file_path) and os.path.getmtime(file_path) < cutoff_time:
+                try:
+                    os.remove(file_path)
+                    cleaned['sessions'] += 1
+                    logger.info(f"Cleaned old session file: {session_file}")
+                except Exception as e:
+                    logger.error(f"Error cleaning session file {session_file}: {e}")
+    
+    return cleaned
+
+def cleanup_other_sessions(current_session_id):
+    """Clean up all sessions EXCEPT the current one"""
+    cleaned = {'uploads': 0, 'outputs': 0, 'sessions': 0}
+    
+    # Clean other session upload directories
+    if os.path.exists(app.config['UPLOAD_FOLDER']):
+        for session_dir in os.listdir(app.config['UPLOAD_FOLDER']):
+            if session_dir != current_session_id:
+                dir_path = os.path.join(app.config['UPLOAD_FOLDER'], session_dir)
+                if os.path.isdir(dir_path):
+                    try:
+                        shutil.rmtree(dir_path)
+                        cleaned['uploads'] += 1
+                        logger.info(f"Cleaned other session upload directory: {session_dir}")
+                    except Exception as e:
+                        logger.error(f"Error cleaning upload directory {session_dir}: {e}")
+    
+    # Clean other session output directories
+    if os.path.exists(app.config['OUTPUT_FOLDER']):
+        for session_dir in os.listdir(app.config['OUTPUT_FOLDER']):
+            if session_dir != current_session_id:
+                dir_path = os.path.join(app.config['OUTPUT_FOLDER'], session_dir)
+                if os.path.isdir(dir_path):
+                    try:
+                        shutil.rmtree(dir_path)
+                        cleaned['outputs'] += 1
+                        logger.info(f"Cleaned other session output directory: {session_dir}")
+                    except Exception as e:
+                        logger.error(f"Error cleaning output directory {session_dir}: {e}")
+    
+    # Keep flask session files - they are needed for active sessions
+    # Only clean files older than 24 hours
+    session_dir = 'flask_session'
+    if os.path.exists(session_dir):
+        cutoff_time = time.time() - (24 * 3600)
+        for session_file in os.listdir(session_dir):
+            file_path = os.path.join(session_dir, session_file)
+            if os.path.isfile(file_path) and os.path.getmtime(file_path) < cutoff_time:
+                try:
+                    os.remove(file_path)
+                    cleaned['sessions'] += 1
+                    logger.info(f"Cleaned old session file: {session_file}")
+                except Exception as e:
+                    logger.error(f"Error cleaning session file {session_file}: {e}")
+    
+    return cleaned
+
+def cleanup_all_sessions():
+    """Clean up ALL session data (aggressive cleanup on startup)"""
+    cleaned = {'uploads': 0, 'outputs': 0, 'sessions': 0}
+    
+    # Clean ALL upload directories
+    if os.path.exists(app.config['UPLOAD_FOLDER']):
+        for session_dir in os.listdir(app.config['UPLOAD_FOLDER']):
+            dir_path = os.path.join(app.config['UPLOAD_FOLDER'], session_dir)
+            if os.path.isdir(dir_path):
+                try:
+                    shutil.rmtree(dir_path)
+                    cleaned['uploads'] += 1
+                    logger.info(f"Cleaned upload directory: {session_dir}")
+                except Exception as e:
+                    logger.error(f"Error cleaning upload directory {session_dir}: {e}")
+    
+    # Clean ALL output directories
+    if os.path.exists(app.config['OUTPUT_FOLDER']):
+        for item in os.listdir(app.config['OUTPUT_FOLDER']):
+            dir_path = os.path.join(app.config['OUTPUT_FOLDER'], item)
+            if os.path.isdir(dir_path):
+                try:
+                    shutil.rmtree(dir_path)
+                    cleaned['outputs'] += 1
+                    logger.info(f"Cleaned output directory: {item}")
+                except Exception as e:
+                    logger.error(f"Error cleaning output directory {item}: {e}")
+    
+    # Clean ALL flask session files
+    session_dir = 'flask_session'
+    if os.path.exists(session_dir):
+        for session_file in os.listdir(session_dir):
+            file_path = os.path.join(session_dir, session_file)
+            if os.path.isfile(file_path):
+                try:
+                    os.remove(file_path)
+                    cleaned['sessions'] += 1
+                    logger.info(f"Cleaned session file: {session_file}")
+                except Exception as e:
+                    logger.error(f"Error cleaning session file {session_file}: {e}")
+    
+    return cleaned
+
+def periodic_cleanup():
+    """Run cleanup periodically in background"""
+    while True:
+        time.sleep(3600)  # Run every hour
+        try:
+            cleaned = cleanup_old_files(hours=24)
+            logger.info(f"Periodic cleanup: {cleaned}")
+        except Exception as e:
+            logger.error(f"Error in periodic cleanup: {e}")
+
 @app.before_request
 def before_request():
     """Initialize session and ensure session directories exist"""
     if 'session_id' not in session:
         session['session_id'] = str(uuid.uuid4())
         session['uploaded_files'] = []
+        
+        # Clean up ALL other sessions when new session starts
+        try:
+            cleaned = cleanup_other_sessions(session['session_id'])
+            if any(cleaned.values()):
+                logger.info(f"New session cleanup (removed other sessions): {cleaned}")
+        except Exception as e:
+            logger.error(f"Error in new session cleanup: {e}")
     
     # Create session-specific directories
     session_id = session['session_id']
@@ -723,5 +875,33 @@ def download_stitched(file_id):
         logger.exception('Error generating stitched Excel download')
         return jsonify({'error': str(e)}), 500
 
+@app.route('/admin/cleanup', methods=['POST'])
+def admin_cleanup():
+    """Manual trigger for cleanup (admin endpoint)"""
+    hours = request.json.get('hours', 24) if request.is_json else 24
+    try:
+        cleaned = cleanup_old_files(hours=hours)
+        return jsonify({
+            'success': True,
+            'message': f'Cleanup completed',
+            'cleaned': cleaned
+        })
+    except Exception as e:
+        logger.exception('Error in manual cleanup')
+        return jsonify({'error': str(e)}), 500
+
 if __name__ == '__main__':
+    # Run aggressive cleanup on server start (removes ALL old session data)
+    try:
+        logger.info("Running aggressive cleanup on server start...")
+        cleaned = cleanup_all_sessions()
+        logger.info(f"Startup cleanup completed: {cleaned}")
+    except Exception as e:
+        logger.error(f"Error in startup cleanup: {e}")
+    
+    # Start background cleanup thread (runs every hour as backup)
+    cleanup_thread = Thread(target=periodic_cleanup, daemon=True)
+    cleanup_thread.start()
+    logger.info("Started periodic cleanup thread (runs every hour, cleans files older than 24h)")
+    
     app.run(debug=True, host='0.0.0.0', port=5000)
