@@ -1,2 +1,572 @@
-# quque1
-PP API call then proceed
+# Questemate - BOQ Extraction & Estimation System
+
+Professional Bill of Quantities (BOQ) extraction and estimation tool with AI-powered table recognition.
+
+## 🚀 Quick Start
+
+The application is **ready to use**! Just follow these steps:
+
+### 1. Start the Application
+```bash
+python app.py
+```
+
+### 2. Open in Browser
+Navigate to: **http://localhost:5000**
+
+### 3. Upload & Extract
+1. **Upload** your files (PDF, XLS, XLSX, JPG, PNG)
+2. **Optional**: Click "Preprocess" for multi-page PDF table stitching
+3. Click "**Extract**" to extract tables using PP-StructureV3 API
+4. View extracted tables in clean markdown format
+
+### 4. Apply Costing
+1. Click "**Costing**" button
+2. Adjust factors using sliders:
+   - Net Margin (0-100%)
+   - Freight (0-50%)
+   - Customs (0-50%)
+   - Installation (0-50%)
+   - Exchange Rate (0.1-10.0)
+   - Additional (0-50%)
+3. Click "Apply Costing" to see updated prices
+
+### 5. Generate Documents
+- **Generate Offer**: Professional commercial offer PDF
+- **Generate Presentation**: Technical proposal (1 page per item)
+- **Generate MAS**: Material Approval Sheets
+- **Value Engineering**: AI-powered product alternatives
+
+## ✨ Features
+
+- **File Upload**: Support for PDF, XLS, XLSX, JPG, PNG files
+- **Table Extraction**: Uses PP-StructureV3 API for accurate table recognition
+- **PDF Pre-processing**: Detect, crop, and stitch tables from multi-page PDFs
+- **Costing Engine**: Apply margin, freight, customs, installation, and exchange rate factors
+- **Offer Generation**: Generate professional commercial offers with applied costing
+- **Presentation Generation**: Create eye-catching technical proposals (1 page per item)
+- **MAS Generation**: Material Approval Sheets with company template
+- **Value Engineering**: AI-powered product alternatives based on budget options
+- **Multi-format Export**: Download results in PDF, XLS, XLSX with embedded images  
+
+## Build Instructions
+
+### Prerequisites
+
+- Python 3.12+
+- pip (Python package manager)
+- Tesseract OCR (for OCR functionality)
+- poppler-utils (for PDF to image conversion)
+
+### Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/Salamony4all/quque1.git
+   cd quque1
+   ```
+
+2. **Install Python dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Install system dependencies (Ubuntu/Debian):**
+   ```bash
+   sudo apt-get update
+   sudo apt-get install -y tesseract-ocr poppler-utils
+   ```
+
+4. **Set up API keys:**
+   
+   The PP-StructureV3 API token is already configured in `app.py`. If you need to use your own token:
+   - Update the `TOKEN` variable in `app.py` (line 15)
+   - Or create a `.env` file and add: `PP_STRUCTURE_TOKEN=your_token_here`
+
+5. **Run the application:**
+   ```bash
+   python app.py
+   ```
+
+6. **Access the application:**
+   
+   Open your browser and navigate to: `http://localhost:5000`
+
+## Usage Workflow
+
+### Step 1: Upload Files
+
+1. Open the application home page
+2. Drag & drop files or click to browse
+3. Supported formats: PDF, XLS, XLSX, JPG, PNG
+4. View uploaded files in the list
+
+### Step 2: Preprocess (Optional - for PDFs with multi-page tables)
+
+1. Click **🔧 Preprocess** button on any uploaded PDF
+2. The system will:
+   - Detect table boundaries
+   - Stitch multi-page tables under one header
+   - Remove non-table content (headers, footers, page numbers)
+3. Preview stitched tables and individual page thumbnails
+
+### Step 3: Extract Tables
+
+1. Click **🎯 Extract** button
+2. PP-StructureV3 API processes the file
+3. View extracted table data in markdown format
+4. Tables are recognized with 1:1 accuracy including:
+   - Column headers (Sl.No, Qty, Description, Unit, Rate, Total)
+   - Product images
+   - All numeric values
+   - Special formatting
+
+### Step 4: Apply Costing
+
+1. Click **💰 Costing** button to open the Costing Card
+2. Adjust factors using sliders:
+   - **Net Margin** (0-100%)
+   - **Freight** (0-50%)
+   - **Customs** (0-50%)
+   - **Installation** (0-50%)
+   - **Exchange Rate** (0.1-10)
+   - **Additional** (0-50%)
+3. Click **Apply Costing** to see updated prices
+4. View summary with Subtotal, VAT, and Grand Total
+
+### Step 5: Generate Documents
+
+#### 📄 Generate Offer
+- Commercial offer PDF with costing factors applied
+- Includes company info, factors summary, and item tables
+
+#### 🎨 Generate Presentation
+- Technical proposal with 1 page per item
+- Eye-catching design with product images
+- Brand, specifications, dimensions, and key features
+
+#### 📋 Generate MAS
+- Material Approval Sheets with company template
+- One page per item with approval sections
+- Technical specifications and images
+
+#### 💡 Value Engineering
+- Generate product alternatives based on budget:
+  - **Budgetary** (70% of original price)
+  - **Medium Range** (100% - original price)
+  - **High End** (150% of original price)
+- AI-powered brand suggestions
+- Comparison table with specs and pricing
+
+### Step 6: Download
+
+All generated documents can be downloaded in multiple formats:
+- **PDF** - For presentations, offers, and MAS
+- **XLSX/XLS** - For extracted data and costing tables
+- **ZIP** - Download all documents at once
+
+## PP-StructureV3 API 
+
+
+## PP-StructureV3 API
+
+The application uses Baidu's PP-StructureV3 API for advanced document parsing and table extraction.
+
+**API Endpoint:** `https://wfk3ide9lcd0x0k9.aistudio-hub.baidu.com/layout-parsing`  
+**Token:** Configured in `app.py`
+
+### Key Features:
+- Layout parsing and table detection
+- OCR with high accuracy
+- Multi-page PDF support
+- Borderless table detection
+- Image extraction from tables
+- Markdown output format
+
+### Configuration Options:
+- `useTableRecognition`: Enabled for table extraction
+- `useDocOrientationClassify`: Auto-correct rotated documents
+- `useTextlineOrientation`: Correct text orientation
+- `visualize`: Return intermediate processing images
+
+For detailed API documentation, see: `PP-StructureV3_API_en documentation.txt`
+
+## Project Structure
+
+```
+quque1/
+├── app.py                          # Main Flask application
+├── requirements.txt                # Python dependencies
+├── README.md                       # This file
+├── templates/
+│   ├── index.html                 # Home page with upload UI
+│   └── costing.html               # Costing card interface
+├── utils/
+│   ├── pdf_processor.py           # PDF preprocessing & table stitching
+│   ├── costing_engine.py          # Apply costing factors
+│   ├── offer_generator.py         # Generate commercial offers
+│   ├── presentation_generator.py  # Generate technical presentations
+│   ├── mas_generator.py           # Generate Material Approval Sheets
+│   ├── value_engineering.py       # AI-powered product alternatives
+│   └── download_manager.py        # Handle downloads in multiple formats
+├── uploads/                        # Uploaded files (auto-created)
+├── outputs/                        # Generated files (auto-created)
+└── flask_session/                  # Session data (auto-created)
+```
+
+## Technical Specifications
+
+### Backend
+- **Framework:** Flask 3.0.0
+- **Session Management:** Flask-Session with filesystem storage
+- **PDF Processing:** pdf2image, PyMuPDF, pdfplumber
+- **OCR:** pytesseract, PP-StructureV3 API
+- **Table Detection:** OpenCV, custom algorithms
+- **Document Generation:** ReportLab, openpyxl, xlsxwriter
+
+### Frontend
+- **HTML5/CSS3** with modern responsive design
+- **JavaScript** for interactive UI and AJAX calls
+- **Drag & Drop** file upload
+- **Real-time progress** indicators
+- **Modal previews** for images
+
+### Security Features
+- Session-based file isolation
+- Secure filename handling with werkzeug
+- Path traversal protection
+- Auto-cleanup on session end
+
+## API Endpoints
+
+### File Management
+- `POST /upload` - Upload files
+- `GET /files` - List uploaded files
+- `DELETE /delete-file/<file_id>` - Delete specific file
+- `POST /cleanup` - Clean all session files
+
+### Processing
+- `POST /preprocess/<file_id>` - PDF preprocessing
+- `POST /extract/<file_id>` - Extract tables with PP-StructureV3
+- `GET/POST /costing` - Apply costing factors
+
+### Generation
+- `POST /generate-offer/<file_id>` - Generate commercial offer
+- `POST /generate-presentation/<file_id>` - Generate presentation
+- `POST /generate-mas/<file_id>` - Generate MAS
+- `POST /value-engineering/<file_id>` - Generate alternatives
+
+### Downloads
+- `GET /download/<file_type>/<file_id>` - Download generated files
+- `GET /outputs/<session_id>/<path>` - Serve output files
+
+## Troubleshooting
+
+### Tesseract Not Found
+```bash
+sudo apt-get install tesseract-ocr
+```
+
+### Poppler Not Found
+```bash
+sudo apt-get install poppler-utils
+```
+
+### Import Errors
+```bash
+pip install -r requirements.txt --upgrade
+```
+
+### Port Already in Use
+Change the port in `app.py`:
+```python
+app.run(debug=True, host='0.0.0.0', port=5001)
+```
+
+## Future Enhancements
+
+- [ ] Multi-language support
+- [ ] Real-time collaboration
+- [ ] Cloud storage integration
+- [ ] Advanced AI product matching with real Architonic API
+- [ ] Email notifications
+- [ ] Project management dashboard
+- [ ] Custom company template upload
+- [ ] Batch processing multiple files
+
+## License
+
+This project is proprietary and confidential.
+
+## Support
+
+For issues or questions, please contact: info@company.com
+
+---
+
+**Built with ❤️ for professional estimators and sales representatives**
+1. Service Call Example (python)
+# Please make sure the requests library is installed
+# pip install requests
+import base64
+import os
+import requests
+
+API_URL = "<https://wfk3ide9lcd0x0k9.aistudio-hub.baidu.com/layout-parsing>"
+TOKEN = "<031c87b3c44d16aa4adf6928bcfa132e23393afc>"
+
+file_path = "<local file path>"
+
+with open(file_path, "rb") as file:
+    file_bytes = file.read()
+    file_data = base64.b64encode(file_bytes).decode("ascii")
+
+headers = {
+    "Authorization": f"token {TOKEN}",
+    "Content-Type": "application/json"
+}
+
+# For PDF documents, set `fileType` to 0; for images, set `fileType` to 1
+payload = {"file": file_data, "fileType": <file type>}
+
+response = requests.post(API_URL, json=payload, headers=headers)
+print(response.status_code)
+assert response.status_code == 200
+result = response.json()["result"]
+
+output_dir = "output"
+os.makedirs(output_dir, exist_ok=True)
+
+for i, res in enumerate(result["layoutParsingResults"]):
+    md_filename = os.path.join(output_dir, f"doc_{i}.md")
+    with open(md_filename, "w") as md_file:
+        md_file.write(res["markdown"]["text"])
+    print(f"Markdown document saved at {md_filename}")
+    for img_path, img in res["markdown"]["images"].items():
+        full_img_path = os.path.join(output_dir, img_path)
+        os.makedirs(os.path.dirname(full_img_path), exist_ok=True)
+        img_bytes = requests.get(img).content
+        with open(full_img_path, "wb") as img_file:
+            img_file.write(img_bytes)
+        print(f"Image saved to: {full_img_path}")
+    for img_name, img in res["outputImages"].items():
+        img_response = requests.get(img)
+        if img_response.status_code == 200:
+            # Save image to local
+            filename = os.path.join(output_dir, f"{img_name}_{i}.jpg")
+            with open(filename, "wb") as f:
+                f.write(img_response.content)
+            print(f"Image saved to: {filename}")
+        else:
+            print(f"Failed to download image, status code: {img_response.status_code}")
+Main operations provided by the service:
+
+The HTTP request method is POST.
+Both the request body and response body are in JSON format (JSON object).
+When the request is processed successfully, the response status code is 200, and the response body contains the following properties:
+Name	Type	Description
+logId	string	The UUID of the request.
+errorCode	integer	Error code. Always 0.
+errorMsg	string	Error description. Always "Success".
+result	object	Operation result.
+When the request is not processed successfully, the response body contains the following properties:
+Name	Type	Description
+logId	string	The UUID of the request.
+errorCode	integer	Error code. Same as the response status code.
+errorMsg	string	Error description.
+Main operations provided by the service are as follows:
+
+infer
+Performs document analysis.
+
+POST /layout-parsing
+
+2. Request Parameter Description
+Name	Parameter	Type	Description	Required
+Input File	file	string	URL of an image or PDF file accessible by the server, or the Base64-encoded content of the above file types.
+By default, for PDF files with more than 10 pages, only the first 10 pages will be processed.
+To remove the page limit, add the following configuration in the pipeline config file:
+Serving:
+  extra:
+    max_num_input_imgs: null
+Yes
+File Type	fileType	integer｜null	File type. 0for PDF files, 1for image files. If this property is not provided, the file type will be inferred from the URL.	No
+Image Orientation Correction	useDocOrientationClassify	boolean|null	Whether to use the document orientation classification module during inference. If enabled, images with 0°, 90°, 180°, and 270° rotation can be automatically detected and corrected.	No
+Image Distortion Correction	useDocUnwarping	boolean|null	Whether to use the text image unwarping module during inference. If enabled, distorted images, such as wrinkled or skewed ones, can be automatically corrected.	No
+Text Line Orientation Correction	useTextlineOrientation	boolean|null	Whether to use the textline orientation classification module during inference. If enabled, 0° and 180° text lines can be automatically detected and corrected.	No
+Seal Recognition	useSealRecognition	boolean|null	Whether to use the seal text recognition sub-pipeline during inference. If enabled, the content of seals in documents can be recognized.	No
+Table Recognition	useTableRecognition	boolean|null	Whether to use the table recognition sub-pipeline during inference. If enabled, tables in documents can be converted to structured formats like HTML or Markdown; if not enabled, tables will be retained as images.	No
+Formula Recognition	useFormulaRecognition	boolean|null	Whether to use the formula recognition sub-pipeline during inference. If enabled, mathematical formulas can be converted to LaTeX code; if not enabled, formulas will be recognized as normal text.	No
+Chart to Table	useChartRecognition	boolean|null	Whether to use the chart parsing module during inference. If enabled, charts (such as bar and pie charts) in documents can be automatically parsed and converted to table format for easier viewing and editing.	No
+Complex Layout Handling	useRegionDetection	boolean|null	Whether to use the document region detection module during inference. If enabled, the module can better recognize complicated layouts such as newspapers and magazines, improving accuracy.	No
+Layout Region Filtering Strength	layoutThreshold	number| object|null	Layout model score threshold. Any float between 0-1. If not set, the pipeline initialization value will be used (default is 0.5).	No
+NMS Postprocessing	layoutNms	boolean|null	If enabled, duplicate or highly overlapping bounding boxes will be automatically removed.	No
+Expansion Coefficient	layoutUnclipRatio	number| array| object|null	Expansion coefficient for layout region detection bounding boxes. Any float greater than 0. If not set, the pipeline initialization value will be used (default is 1.0).	No
+Overlapping Box Filtering Methods	layoutMergeBboxesMode	string| object|null	
+large : Only keep the largest enclosing box for overlapping/contained detection boxes, removing the smaller internal boxes.
+small : Only keep the smallest contained box for overlapping/contained detection boxes, removing the larger external boxes.
+union : No filtering, both inner and outer boxes are kept.
+If not set, the pipeline initialization value will be used (default is large).	No
+Image Side Length Limit	textDetLimitSideLen	integer|null	Image side length limit for text detection. Any integer greater than 0. If not set, the pipeline initialization value will be used (default is 64).	No
+Image Side Length Limit Type	textDetLimitType	string|null	Text detection side length limit type. Supports minand max: minensures the shortest side is not less than textDetLimitSideLen, maxensures the longest side is not greater than textDetLimitSideLen. If not set, the pipeline initialization value will be used (default is min).	No
+Text Detection Pixel Threshold	textDetThresh	number|null	Text detection pixel threshold. Only pixels in the probability map with scores greater than this threshold will be considered as text pixels. Any float greater than 0. If not set, the pipeline initialization value will be used (default is 0.3).	No
+Text Detection Box Threshold	textDetBoxThresh	number|null	Text detection box threshold. If the average score of all pixels within a detected bounding box is greater than this threshold, it will be considered as a text region. Any float greater than 0. If not set, the pipeline initialization value will be used (default is 0.6).	No
+Expansion Coefficient	textDetUnclipRatio	number|null	Text detection expansion coefficient. The larger the value, the more the text region will be expanded. Any float greater than 0. If not set, the pipeline initialization value will be used (default is 1.5).	No
+Text Recognition Score Threshold	textRecScoreThresh	number|null	Text recognition threshold. Only text results with scores greater than this value will be kept. Any float greater than 0. If not set, the pipeline initialization value will be used (default is 0.0, ie, no threshold).	No
+Seal Image Side Length Limit	sealDetLimitSideLen	integer|null	Image side length limit for seal text detection. Any integer greater than 0. If not set, the pipeline initialization value will be used (default is 736).	No
+Seal Image Side Length Limit Type	sealDetLimitType	string|null	Image side length limit type for seal text detection. Supports minand max. minensures the shortest side is not less than sealDetLimitSideLen, maxensures the longest side is not greater than sealDetLimitSideLen. If not set, the pipeline initialization value will be used (default is min).	No
+Seal Text Detection Pixel Threshold	sealDetThresh	number|null	Seal detection pixel threshold. Only pixels in the probability map with scores greater than this threshold will be considered as text pixels. Any float greater than 0. If not set, the pipeline initialization value will be used (default is 0.2).	No
+Seal Text Detection Box Threshold	sealDetBoxThresh	number|null	Seal detection box threshold. If the average score of all pixels within a detected bounding box is greater than this threshold, it will be considered as a text region. Any float greater than 0. If not set, the pipeline initialization value will be used (default is 0.6).	No
+Expansion Coefficient	sealDetUnclipRatio	number|null	Seal text detection expansion coefficient. The larger the value, the more the text region will be expanded. Any float greater than 0. If not set, the pipeline initialization value will be used (default is 0.5).	No
+Seal Text Recognition Score Threshold	sealRecScoreThresh	number|null	Seal text recognition threshold. Only text results with scores greater than this value will be kept. Any float greater than 0. If not set, the pipeline initialization value will be used (default is 0.0, ie, no threshold).	No
+Wired Table to HTML	useWiredTableCellsTransToHtml	boolean	Whether to enable direct HTML conversion of detected wired table cells. If enabled, HTML is directly constructed based on the geometric relation of detected wired table cells.	No
+Wireless Table to HTML	useWirelessTableCellsTransToHtml	boolean	Whether to enable direct HTML conversion of detected wireless table cells. If enabled, HTML is directly constructed based on the geometric relation of detected wireless table cells.	No
+Table Orientation Correction	useTableOrientationClassify	boolean	Whether to enable table orientation classification. If enabled, rotated tables (90°, 180°, 270°) in images can be corrected and recognized properly.	No
+Table Cell-by-Cell Recognition Mode	useOcrResultsWithTableCells	boolean	Whether to enable cell-based OCR splitting. If enabled, OCR detection results will be split and re-recognized based on cell prediction results, avoiding text loss.	No
+End-to-End Wired Table Prediction	useE2eWiredTableRecModel	boolean	Whether to enable end-to-end wired table recognition mode. If enabled, only the table structure recognition model is used, without using the cell detection model.	No
+End-to-End Wireless Table Prediction	useE2eWirelessTableRecModel	boolean	Whether to enable end-to-end wireless table recognition mode. If enabled, only the table structure recognition model is used, without using the cell detection model.	No
+visualize	visualize	boolean|null	Whether to return visualization images and intermediate results during processing.
+Set to true: return images.
+Set to false: do not return images.
+If not provided or set to null: follow the pipeline config file Serving.visualizesetting.
+
+For example, add the following field in the pipeline config file:
+Serving:
+  visualize: False
+By default, images are not returned. The visualizeparameter in the request body can override this default behavior. If neither the request body nor the config file sets this parameter (or if it is nullin the request body and not set in the config file), images will be returned by default.	No
+When the request is processed successfully, the resultfield in the response body has the following properties:
+Name	Type	Description
+layoutParsingResults	array	Document parsing results. The array length is 1 (for image input) or the number of processed document pages (for PDF input). For PDF input, each element represents the result of each processed page in the PDF file.
+dataInfo	object	Input data information.
+Each element in layoutParsingResultsis an objectwith the following properties:
+
+Name	Type	Description
+prunedResult	object	Simplified version of the resfield from the pipeline object's predictmethod in JSON format, with input_pathand page_indexfields removed.
+markdown	object	Markdown result.
+outputImages	object|null	See the imgproperty in the pipeline prediction result for details. Images are in JPEG format and Base64-encoded.
+inputImage	string|null	Input image. JPEG format, Base64-encoded.
+markdownis an objectwith the following properties:
+
+Name	Type	Description
+text	string	Markdown text.
+images	object	Key-value pairs of Markdown image relative paths and Base64-encoded images.
+isStart	boolean	Whether the first element of the current page is the start of a paragraph.
+isEnd	boolean	Whether the last element of the current page is the end of a paragraph.
+Note : If you encounter any issues during use, please feel free to submit feedback in the issue section.
+
+(# Please make sure the requests library is installed
+# pip install requests
+import base64
+import os
+import requests
+
+API_URL = "https://wfk3ide9lcd0x0k9.aistudio-hub.baidu.com/layout-parsing"
+TOKEN = "1fa8aee0928ae7caa47c5cfb35e88ce0900d1d73"
+
+file_path = "<local file path>"
+
+with open(file_path, "rb") as file:
+    file_bytes = file.read()
+    file_data = base64.b64encode(file_bytes).decode("ascii")
+
+headers = {
+    "Authorization": f"token {TOKEN}",
+    "Content-Type": "application/json"
+}
+
+# For PDF documents, set `fileType` to 0; for images, set `fileType` to 1
+payload = {"file": file_data, "fileType": <file type>}
+
+response = requests.post(API_URL, json=payload, headers=headers)
+print(response.status_code)
+assert response.status_code == 200
+result = response.json()["result"]
+
+output_dir = "output"
+os.makedirs(output_dir, exist_ok=True)
+
+for i, res in enumerate(result["layoutParsingResults"]):
+    md_filename = os.path.join(output_dir, f"doc_{i}.md")
+    with open(md_filename, "w") as md_file:
+        md_file.write(res["markdown"]["text"])
+    print(f"Markdown document saved at {md_filename}")
+    for img_path, img in res["markdown"]["images"].items():
+        full_img_path = os.path.join(output_dir, img_path)
+        os.makedirs(os.path.dirname(full_img_path), exist_ok=True)
+        img_bytes = requests.get(img).content
+        with open(full_img_path, "wb") as img_file:
+            img_file.write(img_bytes)
+        print(f"Image saved to: {full_img_path}")
+    for img_name, img in res["outputImages"].items():
+        img_response = requests.get(img)
+        if img_response.status_code == 200:
+            # Save image to local
+            filename = os.path.join(output_dir, f"{img_name}_{i}.jpg")
+            with open(filename, "wb") as f:
+                f.write(img_response.content)
+            print(f"Image saved to: {filename}")
+        else:
+            print(f"Failed to download image, status code: {img_response.status_code}")
+
+
+1 - "UPLOAD" :- Various types of files "PDF, xls, xlxs, jpeg, PNG, etc."
+ 
+1.1 - Show Realtime progress bar as indication of upload progress with start Extraction button with real-time progress bar showing real-time progress processing the extraction of tables within uploaded files.
+
+1.2 - Add files to list of uploaded files list making sure of house keeping deleting all uploaded or Extracted files or images after every Extraction session, Refresh, Reload, App Restart or App Reload.
+
+2 - Only table structured item lines, BOQ, Price Lists, item Lists to be Recognized and Ignore any other text outside the table box, lines, boundaries such as Cover pages letter heads, projects names, references, Dates , Terms and Conditions, Page letter head logo, Page footer, Page number ,text only tables etc. ) .
+
+2.2 - Stitch tables within file uploaded as One continuous table under One main Table Header Row even there is multiple pages.
+
+2.3 - Separately recognize Total summaries such as " Total, VAT, Grand Total, Grand Total, etc. " to be Bolded and centered text with bolded numeric values at the very bottom of the table " right side".
+
+2.4 - borderless tables logic might be confused by subtitles. subtitle can be isolated as it is doesn't have values or images. prevent the leaking data across the Rows/cells and table body "text/image/values/numbers" to be considered in it's original designated cells as original and paste in it's designated cell /row/header coordinates/location in the table.
+
+3 - "COSTING" :-Costing Card to Recognize the "Rate, Unit Rate, Price, etc." Column/Row Cell and create Costing card with Adjustable Factors with % field and modern style UI Sliders for ( Net Margin, Freight, Customs, Installation, Exchange rate and Additional ) to impact on Unit Rate/Price and Amount/Summaries Accordingly.
+
+4- "GENERATE OFFER" :- Generate Offer Card with button to create impacted mirror Copy of Extract table with Costing card Factors Occurred.
+
+5 - "GENERATE PRESENTATION" :- create WOW effective Technical proposal representing 1 page per item line in the table with eye catching Designs including product images to be 1 page per item including Description extracted from same product line showing attractive modern style UI design showing larger image extracted from original table or extracted results product with more details regarding it's Brand, Country of origins, Finish, warranty and Specifications.
+
+6 - "GENERATE M.A.S" :- Material Approval Sheets to be similar to presentation but with Company "MAS" Template embedded. (download from internet)
+
+7 - "GENERATE VALUE ENGINEERED OFFERS" :- Maintain extracted tables with adding drop-down menu on the card to select from three main budget options (budgetary, medium range, high end). This drop down selection menu to select new Brand's/Product's using AI according to item description to search All available Brand's " Use (https://www.architonic.com/) website as source data base of FF&E Brand's/Products reference such as Sedus, Narbutas, Sokoa, B&T, etc. ".
+
+8 - "DOWNLOAD" :-  All results ( 1:1 Replica of Table Extracted, Generated Quote, Generated presentation, Generated MAS, Generated Alternative Offer) to be Downloaded in PDF, XLS,XLSX formats with images embedded.
+
+
+
+the API given is production level, preview its results in HTML as is, if it is require more work we can develope the results recived after previewing its accuracy our goal is to create 1:1 replica from tables within files uploaded.
+
+before upload to API Card create seperate in app pre-processing card to upload pdf with multi page tables, to detect the table boundaries only in all the pages ignoring any other text, references, terms, page headers, dates, page footer, page numbers (ONLY ITEM LINE TABLES), then stitch tables under one main header (don't repeate the table header) preview under the card in one continues table image form to be previewed before upload to API for table recognition and extraction card.
+
+stitching process to be seperately done with seperate work flow for example pdf2image.py
+
+Add new button within the stitching card to crop table structured data/images ONLY, depending on table header with common key text of column headers such as "Sn", "Qty", "Image", "Description", "Unit", "Unit Rate", "Total" Etc. then crop it separately and present it to be sequence of Separate images according their page number sequence as thumbnails to be previewed when clicked.
+
+cropped table from preview showing stitched table. it must show separated tables images depending on table box boundaries 
+
+still noticing some unrequired data/text cropped with the table make sure to fine tune the cropping to be exactly on the table limits boundaries
+
+create the image extracted selectable to upload multi pages one by one with progress showing progress on current page process in same sequence upload and processing for each page to the API and receive the results to stitch table extraction results to create one continues table including summaries.
+
+flask
+pdfplumber
+tabula-py==2.9.0
+pandas
+camelot-py[cv]
+Flask-Session
+python-dotenv
+pytesseract
+opencv-python
+openpyxl
+python-docx
+PyMuPDF
+pdf2image
+ReportLab
+WeasyPrint
+pdfkit
+xlsxwriter
+requests
+

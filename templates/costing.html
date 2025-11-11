@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Costing Card - Questemate</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .main-content {
+            padding: 40px;
+        }
+        
+        .costing-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .costing-card h2 {
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 1.8em;
+        }
+        
+        .factor-control {
+            margin-bottom: 30px;
+        }
+        
+        .factor-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .factor-value {
+            color: #667eea;
+            font-size: 1.2em;
+        }
+        
+        .slider-container {
+            position: relative;
+            width: 100%;
+        }
+        
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #d3d3d3;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            border: none;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .input-field {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+        
+        .input-field:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .preview-table {
+            margin-top: 30px;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+        
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .price-changed {
+            color: #28a745;
+            font-weight: 600;
+        }
+        
+        .price-original {
+            color: #999;
+            text-decoration: line-through;
+            font-size: 0.9em;
+        }
+        
+        .summary-section {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            font-size: 1.1em;
+        }
+        
+        .summary-row.grand-total {
+            font-weight: 700;
+            font-size: 1.3em;
+            border-top: 2px solid #333;
+            margin-top: 10px;
+            padding-top: 15px;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>💰 Costing Card</h1>
+            <p>Apply Costing Factors to Your BOQ</p>
+        </header>
+        
+        <div class="main-content">
+            <a href="/" class="back-link">← Back to Home</a>
+            
+            <div class="costing-card">
+                <h2>Costing Factors</h2>
+                
+                <div class="factor-control">
+                    <div class="factor-label">
+                        <span>Net Margin (%)</span>
+                        <span class="factor-value" id="netMarginValue">0%</span>
+                    </div>
+                    <input type="range" min="0" max="100" value="0" step="0.5" class="slider" id="netMarginSlider">
+                </div>
+                
+                <div class="factor-control">
+                    <div class="factor-label">
+                        <span>Freight (%)</span>
+                        <span class="factor-value" id="freightValue">0%</span>
+                    </div>
+                    <input type="range" min="0" max="50" value="0" step="0.5" class="slider" id="freightSlider">
+                </div>
+                
+                <div class="factor-control">
+                    <div class="factor-label">
+                        <span>Customs (%)</span>
+                        <span class="factor-value" id="customsValue">0%</span>
+                    </div>
+                    <input type="range" min="0" max="50" value="0" step="0.5" class="slider" id="customsSlider">
+                </div>
+                
+                <div class="factor-control">
+                    <div class="factor-label">
+                        <span>Installation (%)</span>
+                        <span class="factor-value" id="installationValue">0%</span>
+                    </div>
+                    <input type="range" min="0" max="50" value="0" step="0.5" class="slider" id="installationSlider">
+                </div>
+                
+                <div class="factor-control">
+                    <div class="factor-label">
+                        <span>Exchange Rate</span>
+                        <span class="factor-value" id="exchangeRateValue">1.00</span>
+                    </div>
+                    <input type="range" min="0.1" max="10" value="1" step="0.01" class="slider" id="exchangeRateSlider">
+                </div>
+                
+                <div class="factor-control">
+                    <div class="factor-label">
+                        <span>Additional (%)</span>
+                        <span class="factor-value" id="additionalValue">0%</span>
+                    </div>
+                    <input type="range" min="0" max="50" value="0" step="0.5" class="slider" id="additionalSlider">
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="applyCosting()">🎯 Apply Costing</button>
+                    <button class="btn btn-success" onclick="generateOffer()">📄 Generate Offer</button>
+                    <button class="btn btn-info" onclick="generatePresentation()">🎨 Generate Presentation</button>
+                    <button class="btn btn-warning" onclick="generateMAS()">📋 Generate MAS</button>
+                    <button class="btn btn-info" onclick="valueEngineering()">💡 Value Engineering</button>
+                </div>
+            </div>
+            
+            <div class="preview-table" id="previewTable" style="display:none;">
+                <h2>Costed BOQ Preview</h2>
+                <div id="tableContent"></div>
+                <div class="summary-section" id="summarySection"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Get file ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const fileId = urlParams.get('file_id');
+        
+        // Slider event listeners
+        const sliders = {
+            netMargin: document.getElementById('netMarginSlider'),
+            freight: document.getElementById('freightSlider'),
+            customs: document.getElementById('customsSlider'),
+            installation: document.getElementById('installationSlider'),
+            exchangeRate: document.getElementById('exchangeRateSlider'),
+            additional: document.getElementById('additionalSlider')
+        };
+        
+        sliders.netMargin.addEventListener('input', (e) => {
+            document.getElementById('netMarginValue').textContent = e.target.value + '%';
+        });
+        
+        sliders.freight.addEventListener('input', (e) => {
+            document.getElementById('freightValue').textContent = e.target.value + '%';
+        });
+        
+        sliders.customs.addEventListener('input', (e) => {
+            document.getElementById('customsValue').textContent = e.target.value + '%';
+        });
+        
+        sliders.installation.addEventListener('input', (e) => {
+            document.getElementById('installationValue').textContent = e.target.value + '%';
+        });
+        
+        sliders.exchangeRate.addEventListener('input', (e) => {
+            document.getElementById('exchangeRateValue').textContent = parseFloat(e.target.value).toFixed(2);
+        });
+        
+        sliders.additional.addEventListener('input', (e) => {
+            document.getElementById('additionalValue').textContent = e.target.value + '%';
+        });
+        
+        async function applyCosting() {
+            const factors = {
+                net_margin: parseFloat(sliders.netMargin.value),
+                freight: parseFloat(sliders.freight.value),
+                customs: parseFloat(sliders.customs.value),
+                installation: parseFloat(sliders.installation.value),
+                exchange_rate: parseFloat(sliders.exchangeRate.value),
+                additional: parseFloat(sliders.additional.value)
+            };
+            
+            try {
+                const response = await fetch('/costing', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        file_id: fileId,
+                        factors: factors
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayCostedTable(result.result);
+                    showAlert('Costing applied successfully!', 'success');
+                } else {
+                    showAlert('Error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+        
+        function displayCostedTable(tables) {
+            const previewTable = document.getElementById('previewTable');
+            const tableContent = document.getElementById('tableContent');
+            
+            previewTable.style.display = 'block';
+            
+            let html = '';
+            tables.forEach((table, idx) => {
+                html += `<h3>Table ${idx + 1}</h3>`;
+                html += '<table>';
+                html += '<tr>';
+                table.headers.forEach(header => {
+                    html += `<th>${header}</th>`;
+                });
+                html += '</tr>';
+                
+                table.rows.forEach(row => {
+                    html += '<tr>';
+                    table.headers.forEach(header => {
+                        let cellValue = row[header] || '';
+                        if (row[`${header}_original`]) {
+                            cellValue = `<span class="price-original">${row[`${header}_original`]}</span><br><span class="price-changed">${cellValue}</span>`;
+                        }
+                        html += `<td>${cellValue}</td>`;
+                    });
+                    html += '</tr>';
+                });
+                
+                html += '</table>';
+            });
+            
+            tableContent.innerHTML = html;
+            
+            // Calculate summary
+            calculateSummary(tables);
+        }
+        
+        function calculateSummary(tables) {
+            const summarySection = document.getElementById('summarySection');
+            
+            let subtotal = 0;
+            
+            // Calculate totals from all tables
+            tables.forEach(table => {
+                table.rows.forEach(row => {
+                    for (let key in row) {
+                        if (key.toLowerCase().includes('total') && !key.includes('_original')) {
+                            const value = parseFloat(row[key]);
+                            if (!isNaN(value)) {
+                                subtotal += value;
+                            }
+                        }
+                    }
+                });
+            });
+            
+            const vat = subtotal * 0.15; // Assuming 15% VAT
+            const grandTotal = subtotal + vat;
+            
+            summarySection.innerHTML = `
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span>${subtotal.toFixed(2)}</span>
+                </div>
+                <div class="summary-row">
+                    <span>VAT (15%):</span>
+                    <span>${vat.toFixed(2)}</span>
+                </div>
+                <div class="summary-row grand-total">
+                    <span>Grand Total:</span>
+                    <span>${grandTotal.toFixed(2)}</span>
+                </div>
+            `;
+        }
+        
+        async function generateOffer() {
+            try {
+                const response = await fetch(`/generate-offer/${fileId}`, {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('Offer generated successfully!', 'success');
+                    window.open(`/download/offer/${fileId}?format=pdf`, '_blank');
+                } else {
+                    showAlert('Error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+        
+        async function generatePresentation() {
+            try {
+                const response = await fetch(`/generate-presentation/${fileId}`, {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('Presentation generated successfully!', 'success');
+                    window.open(`/download/presentation/${fileId}?format=pdf`, '_blank');
+                } else {
+                    showAlert('Error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+        
+        async function generateMAS() {
+            try {
+                const response = await fetch(`/generate-mas/${fileId}`, {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('MAS generated successfully!', 'success');
+                    window.open(`/download/mas/${fileId}?format=pdf`, '_blank');
+                } else {
+                    showAlert('Error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+        
+        async function valueEngineering() {
+            const budgetOption = prompt('Select budget option:\n1. Budgetary\n2. Medium Range\n3. High End', '2');
+            const options = {'1': 'budgetary', '2': 'medium', '3': 'high_end'};
+            
+            try {
+                const response = await fetch(`/value-engineering/${fileId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        budget_option: options[budgetOption] || 'medium'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('Value engineering alternatives generated!', 'success');
+                    // Display alternatives
+                } else {
+                    showAlert('Error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+        
+        function showAlert(message, type) {
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            
+            document.querySelector('.main-content').insertBefore(alert, document.querySelector('.costing-card'));
+            
+            setTimeout(() => alert.remove(), 5000);
+        }
+    </script>
+</body>
+</html>
