@@ -665,11 +665,12 @@ def costing():
     data = request.json
     file_id = data.get('file_id')
     factors = data.get('factors', {})
+    table_data = data.get('table_data')  # Get table data from DOM
     
     try:
         from utils.costing_engine import CostingEngine
         engine = CostingEngine()
-        result = engine.apply_factors(file_id, factors, session)
+        result = engine.apply_factors(file_id, factors, session, table_data)
         
         return jsonify({
             'success': True,

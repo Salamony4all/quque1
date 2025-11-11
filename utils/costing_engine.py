@@ -15,12 +15,17 @@ class CostingEngine:
             'additional': 0
         }
     
-    def apply_factors(self, file_id, factors, session):
+    def apply_factors(self, file_id, factors, session, table_data=None):
         """
         Apply costing factors to the extracted table
+        Args:
+            file_id: The file ID
+            factors: Dictionary of costing factors
+            session: Flask session
+            table_data: Optional - table data extracted from DOM (preferred method)
         Returns: Updated table with new prices
         """
-        # Get extraction result from session
+        # Get file info from session
         uploaded_files = session.get('uploaded_files', [])
         file_info = None
         
@@ -29,13 +34,17 @@ class CostingEngine:
                 file_info = f
                 break
         
-        if not file_info or 'extraction_result' not in file_info:
-            raise Exception('Extraction result not found')
+        if not file_info:
+            raise Exception('File not found')
         
-        extraction_result = file_info['extraction_result']
-        
-        # Parse the markdown tables
-        tables_data = self.parse_markdown_tables(extraction_result)
+        # Use provided table_data if available, otherwise parse from extraction_result
+        if table_data:
+            tables_data = [table_data]
+        elif 'extraction_result' in file_info:
+            extraction_result = file_info['extraction_result']
+            tables_data = self.parse_markdown_tables(extraction_result)
+        else:
+            raise Exception('No table data available')
         
         # Apply factors to each row
         updated_tables = []
@@ -43,10 +52,11 @@ class CostingEngine:
             updated_table = self.apply_factors_to_table(table, factors)
             updated_tables.append(updated_table)
         
-        # Store costed data
+        # Store costed data in session
         file_info['costed_data'] = {
             'factors': factors,
-            'tables': updated_tables
+            'tables': updated_tables,
+            'original_table': table_data if table_data else tables_data[0]
         }
         session.modified = True
         
@@ -155,9 +165,8 @@ class CostingEngine:
                         new_price *= (1 + factors.get('net_margin', 0) / 100)
                         new_price *= (1 + factors.get('additional', 0) / 100)
                         
-                        # Update the row
+                        # Update the row with new price only (no _original)
                         updated_row[col] = f"{new_price:.2f}"
-                        updated_row[f'{col}_original'] = row[col]
             
             # Recalculate totals if quantity and unit rate exist
             updated_row = self.recalculate_totals(updated_row, table_data['headers'])

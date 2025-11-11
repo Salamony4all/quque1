@@ -4,9 +4,10 @@ from reportlab.lib import colors
 from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image as RLImage
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.enums import TA_CENTER, TA_RIGHT
+from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
 import json
 from datetime import datetime
+import re
 
 class OfferGenerator:
     """Generate offer documents with costing factors applied"""
@@ -99,63 +100,137 @@ class OfferGenerator:
         story.append(Paragraph(factors_text, self.styles['Normal']))
         story.append(Spacer(1, 0.3*inch))
         
-        # Tables
+        # Tables with images
         for idx, table_data in enumerate(costed_data['tables']):
-            header = Paragraph(f"Item List {idx + 1}", self.header_style)
+            header = Paragraph(f"<b>Item List {idx + 1}</b>", self.header_style)
             story.append(header)
+            story.append(Spacer(1, 0.2*inch))
             
-            # Create table
+            # Get session and file info for images
+            session_id = session['session_id']
+            file_info = None
+            uploaded_files = session.get('uploaded_files', [])
+            for f in uploaded_files:
+                if f['id'] == file_id:
+                    file_info = f
+                    break
+            
+            # Prepare table data with images
             table_rows = []
             
-            # Headers
-            table_rows.append(table_data['headers'])
+            # Headers - clean and format
+            headers = table_data['headers']
+            header_row = [Paragraph(f"<b>{h}</b>", self.styles['Normal']) for h in headers]
+            table_rows.append(header_row)
             
-            # Data rows
+            # Data rows - show only final costed prices with images
             for row in table_data['rows']:
-                table_row = [row.get(h, '') for h in table_data['headers']]
+                table_row = []
+                
+                for h in headers:
+                    cell_value = row.get(h, '')
+                    
+                    # Skip original price fields
+                    if '_original' in h:
+                        continue
+                    
+                    # Check if this cell contains an image reference
+                    if self.contains_image(cell_value):
+                        # Extract image path and create image element
+                        image_path = self.extract_image_path(cell_value, session_id, file_id)
+                        if image_path and os.path.exists(image_path):
+                            try:
+                                # Create image with proper sizing
+                                img = RLImage(image_path, width=1*inch, height=1*inch)
+                                table_row.append(img)
+                            except Exception as e:
+                                # If image fails, show text instead
+                                table_row.append(Paragraph(str(cell_value), self.styles['Normal']))
+                        else:
+                            table_row.append(Paragraph(str(cell_value), self.styles['Normal']))
+                    else:
+                        # Regular text cell - use final costed value only
+                        final_value = str(cell_value)
+                        
+                        # Format numbers nicely
+                        if self.is_numeric_column(h):
+                            try:
+                                num_val = float(re.sub(r'[^\d.-]', '', final_value))
+                                final_value = f"{num_val:,.2f}"
+                            except:
+                                pass
+                        
+                        table_row.append(Paragraph(final_value, self.styles['Normal']))
+                
                 table_rows.append(table_row)
             
-            # Create ReportLab table
-            t = Table(table_rows, repeatRows=1)
+            # Create ReportLab table with appropriate column widths
+            col_widths = self.calculate_column_widths(headers, len(headers))
+            t = Table(table_rows, colWidths=col_widths, repeatRows=1)
             
-            # Style the table
+            # Enhanced table styling
             table_style = TableStyle([
+                # Header styling
                 ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#667eea')),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
                 ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, 0), 10),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-                ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-                ('GRID', (0, 0), (-1, -1), 1, colors.black),
-                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('FONTSIZE', (0, 0), (-1, 0), 9),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+                ('TOPPADDING', (0, 0), (-1, 0), 10),
+                
+                # Data rows styling
+                ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+                ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+                ('ALIGN', (0, 1), (-1, -1), 'CENTER'),
+                ('VALIGN', (0, 1), (-1, -1), 'MIDDLE'),
+                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 1), (-1, -1), 8),
+                ('TOPPADDING', (0, 1), (-1, -1), 8),
+                ('BOTTOMPADDING', (0, 1), (-1, -1), 8),
+                ('LEFTPADDING', (0, 1), (-1, -1), 5),
+                ('RIGHTPADDING', (0, 1), (-1, -1), 5),
+                
+                # Grid
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+                ('BOX', (0, 0), (-1, -1), 1, colors.black),
+                
+                # Alternating row colors for better readability
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f8f9fa')]),
             ])
             
             t.setStyle(table_style)
             story.append(t)
-            story.append(Spacer(1, 0.3*inch))
+            story.append(Spacer(1, 0.4*inch))
         
-        # Summary
-        summary_header = Paragraph("SUMMARY", self.header_style)
+        # Summary with updated VAT (5%)
+        summary_header = Paragraph("<b>SUMMARY</b>", self.header_style)
         story.append(summary_header)
+        story.append(Spacer(1, 0.2*inch))
         
         # Calculate totals
         subtotal = self.calculate_subtotal(costed_data['tables'])
-        vat = subtotal * 0.15
+        vat = subtotal * 0.05  # 5% VAT
         grand_total = subtotal + vat
         
         summary_data = [
-            ['Subtotal:', f'{subtotal:.2f}'],
-            ['VAT (15%):', f'{vat:.2f}'],
-            ['<b>Grand Total:</b>', f'<b>{grand_total:.2f}</b>']
+            ['Subtotal:', f'{subtotal:,.2f}'],
+            ['VAT (5%):', f'{vat:,.2f}'],
+            ['', ''],  # Empty row for spacing
+            ['Grand Total:', f'{grand_total:,.2f}']
         ]
         
         summary_table = Table(summary_data, colWidths=[4*inch, 2*inch])
         summary_style = TableStyle([
+            ('ALIGN', (0, 0), (0, -1), 'RIGHT'),
             ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
-            ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, -1), (-1, -1), 12),
-            ('LINEABOVE', (0, -1), (-1, -1), 2, colors.black),
+            ('FONTNAME', (0, 0), (-1, 2), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, 2), 11),
+            ('FONTNAME', (0, 3), (-1, 3), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 3), (-1, 3), 14),
+            ('TEXTCOLOR', (0, 3), (-1, 3), colors.HexColor('#667eea')),
+            ('LINEABOVE', (0, 3), (-1, 3), 2, colors.HexColor('#667eea')),
+            ('TOPPADDING', (0, 3), (-1, 3), 10),
         ])
         summary_table.setStyle(summary_style)
         story.append(summary_table)
@@ -183,11 +258,76 @@ class OfferGenerator:
         for table in tables:
             for row in table['rows']:
                 for key, value in row.items():
-                    if 'total' in key.lower() and '_original' not in key:
+                    # Look for total/amount columns, exclude original values
+                    if ('total' in key.lower() or 'amount' in key.lower()) and '_original' not in key:
                         try:
-                            num_value = float(str(value).replace(',', ''))
+                            num_value = float(str(value).replace(',', '').replace('OMR', '').replace('$', '').strip())
                             subtotal += num_value
                         except:
                             pass
         
         return subtotal
+    
+    def contains_image(self, cell_value):
+        """Check if cell contains an image reference"""
+        return '<img' in str(cell_value).lower() or 'img_in_' in str(cell_value).lower()
+    
+    def extract_image_path(self, cell_value, session_id, file_id):
+        """Extract image path from cell value"""
+        try:
+            # Look for img src pattern
+            import re
+            match = re.search(r'src=["\']([^"\']+)["\']', str(cell_value))
+            if match:
+                img_relative_path = match.group(1)
+                # Convert to absolute path
+                img_path = os.path.join('outputs', session_id, file_id, img_relative_path)
+                return img_path
+            
+            # Try to find image reference in text
+            if 'img_in_' in str(cell_value):
+                match = re.search(r'(imgs/img_in_[^"\s<>]+\.jpg)', str(cell_value))
+                if match:
+                    img_relative_path = match.group(1)
+                    img_path = os.path.join('outputs', session_id, file_id, img_relative_path)
+                    return img_path
+        except Exception as e:
+            pass
+        
+        return None
+    
+    def is_numeric_column(self, header):
+        """Check if column likely contains numeric values"""
+        numeric_keywords = ['qty', 'quantity', 'rate', 'price', 'amount', 'total', 'cost']
+        return any(keyword in header.lower() for keyword in numeric_keywords)
+    
+    def calculate_column_widths(self, headers, num_cols):
+        """Calculate appropriate column widths based on headers"""
+        total_width = 7.5 * inch  # A4 page width minus margins
+        
+        # Identify column types
+        widths = []
+        for header in headers:
+            h_lower = header.lower()
+            if 'si' in h_lower or 'no' in h_lower or '#' in h_lower:
+                widths.append(0.5 * inch)  # Serial number - narrow
+            elif 'img' in h_lower or 'image' in h_lower or 'ref' in h_lower:
+                widths.append(1.2 * inch)  # Image column - wider
+            elif 'description' in h_lower or 'item' in h_lower:
+                widths.append(2.5 * inch)  # Description - widest
+            elif 'qty' in h_lower or 'unit' in h_lower:
+                widths.append(0.7 * inch)  # Quantity/Unit - narrow
+            elif 'rate' in h_lower or 'price' in h_lower:
+                widths.append(1.0 * inch)  # Rate - medium
+            elif 'amount' in h_lower or 'total' in h_lower:
+                widths.append(1.1 * inch)  # Total - medium
+            else:
+                widths.append(1.0 * inch)  # Default
+        
+        # Normalize to fit total width
+        current_total = sum(widths)
+        if current_total > total_width:
+            scale_factor = total_width / current_total
+            widths = [w * scale_factor for w in widths]
+        
+        return widths

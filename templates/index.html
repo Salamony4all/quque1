@@ -384,6 +384,116 @@
                 display: none !important;
             }
         }
+        
+        /* Costing Card Styles */
+        .costing-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 20px;
+        }
+        
+        .factor-control {
+            margin-bottom: 25px;
+        }
+        
+        .factor-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .factor-value {
+            color: #667eea;
+            font-size: 1.2em;
+            min-width: 80px;
+            text-align: right;
+        }
+        
+        .slider-container {
+            position: relative;
+            width: 100%;
+        }
+        
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #d3d3d3;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            border: none;
+        }
+        
+        .costing-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .preview-section {
+            margin-top: 30px;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        
+        .summary-section {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            font-size: 1.1em;
+        }
+        
+        .summary-row.grand-total {
+            font-weight: 700;
+            font-size: 1.3em;
+            border-top: 2px solid #333;
+            margin-top: 10px;
+            padding-top: 15px;
+        }
+        
+        .price-changed {
+            color: #28a745;
+            font-weight: 600;
+        }
+        
+        .price-original {
+            color: #999;
+            text-decoration: line-through;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 <body>
@@ -432,6 +542,74 @@
             <div class="card" id="extractedTablesCard" style="display:none;">
                 <h2>📊 Extracted Tables</h2>
                 <div id="extractedTablesContainer"></div>
+            </div>
+            
+            <!-- Costing Card Section -->
+            <div class="card" id="costingCard" style="display:none;">
+                <h2>💰 Apply Costing Factors</h2>
+                <div class="costing-card">
+                    <div class="factor-control">
+                        <div class="factor-label">
+                            <span>Net Margin (%)</span>
+                            <span class="factor-value" id="netMarginValue">0%</span>
+                        </div>
+                        <input type="range" min="0" max="100" value="0" step="0.5" class="slider" id="netMarginSlider">
+                    </div>
+                    
+                    <div class="factor-control">
+                        <div class="factor-label">
+                            <span>Freight (%)</span>
+                            <span class="factor-value" id="freightValue">0%</span>
+                        </div>
+                        <input type="range" min="0" max="50" value="0" step="0.5" class="slider" id="freightSlider">
+                    </div>
+                    
+                    <div class="factor-control">
+                        <div class="factor-label">
+                            <span>Customs (%)</span>
+                            <span class="factor-value" id="customsValue">0%</span>
+                        </div>
+                        <input type="range" min="0" max="50" value="0" step="0.5" class="slider" id="customsSlider">
+                    </div>
+                    
+                    <div class="factor-control">
+                        <div class="factor-label">
+                            <span>Installation (%)</span>
+                            <span class="factor-value" id="installationValue">0%</span>
+                        </div>
+                        <input type="range" min="0" max="50" value="0" step="0.5" class="slider" id="installationSlider">
+                    </div>
+                    
+                    <div class="factor-control">
+                        <div class="factor-label">
+                            <span>Exchange Rate</span>
+                            <span class="factor-value" id="exchangeRateValue">1.00</span>
+                        </div>
+                        <input type="range" min="0.1" max="10" value="1" step="0.01" class="slider" id="exchangeRateSlider">
+                    </div>
+                    
+                    <div class="factor-control">
+                        <div class="factor-label">
+                            <span>Additional (%)</span>
+                            <span class="factor-value" id="additionalValue">0%</span>
+                        </div>
+                        <input type="range" min="0" max="50" value="0" step="0.5" class="slider" id="additionalSlider">
+                    </div>
+                    
+                    <div class="costing-actions">
+                        <button class="btn btn-primary" onclick="applyCosting()">🎯 Apply Costing</button>
+                        <button class="btn btn-success" onclick="generateOffer()">📄 Generate Offer</button>
+                        <button class="btn btn-info" onclick="generatePresentation()">🎨 Generate Presentation</button>
+                        <button class="btn btn-warning" onclick="generateMAS()">📋 Generate MAS</button>
+                        <button class="btn btn-info" onclick="valueEngineering()">💡 Value Engineering</button>
+                    </div>
+                    
+                    <div class="preview-section" id="costingPreview" style="display:none;">
+                        <h3>Costed BOQ Preview</h3>
+                        <div id="costedTableContent"></div>
+                        <div class="summary-section" id="costingSummary"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1516,6 +1694,351 @@
             
             setTimeout(() => alert.remove(), 5000);
         }
+        
+        // ======= COSTING FUNCTIONALITY =======
+        let currentFileIdForCosting = null;
+        
+        // Initialize costing sliders
+        function initializeCostingSliders() {
+            const sliders = {
+                netMargin: document.getElementById('netMarginSlider'),
+                freight: document.getElementById('freightSlider'),
+                customs: document.getElementById('customsSlider'),
+                installation: document.getElementById('installationSlider'),
+                exchangeRate: document.getElementById('exchangeRateSlider'),
+                additional: document.getElementById('additionalSlider')
+            };
+            
+            sliders.netMargin.addEventListener('input', (e) => {
+                document.getElementById('netMarginValue').textContent = e.target.value + '%';
+            });
+            
+            sliders.freight.addEventListener('input', (e) => {
+                document.getElementById('freightValue').textContent = e.target.value + '%';
+            });
+            
+            sliders.customs.addEventListener('input', (e) => {
+                document.getElementById('customsValue').textContent = e.target.value + '%';
+            });
+            
+            sliders.installation.addEventListener('input', (e) => {
+                document.getElementById('installationValue').textContent = e.target.value + '%';
+            });
+            
+            sliders.exchangeRate.addEventListener('input', (e) => {
+                document.getElementById('exchangeRateValue').textContent = parseFloat(e.target.value).toFixed(2);
+            });
+            
+            sliders.additional.addEventListener('input', (e) => {
+                document.getElementById('additionalValue').textContent = e.target.value + '%';
+            });
+        }
+        
+        // Open costing card (triggered from table actions)
+        function openCosting(fileId) {
+            currentFileIdForCosting = fileId;
+            const costingCard = document.getElementById('costingCard');
+            costingCard.style.display = 'block';
+            
+            // Scroll to costing card
+            costingCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            showAlert('Costing panel opened! Adjust factors and click Apply Costing 💰', 'success');
+        }
+        
+        // Apply costing factors
+        async function applyCosting() {
+            if (!currentFileIdForCosting) {
+                showAlert('Please select a table first by clicking "Apply Costing" button', 'error');
+                return;
+            }
+            
+            // Extract table data from DOM
+            const table = document.getElementById(`table-${currentFileIdForCosting}`);
+            if (!table) {
+                showAlert('Table not found in the page', 'error');
+                return;
+            }
+            
+            const tableData = extractTableData(table);
+            
+            const factors = {
+                net_margin: parseFloat(document.getElementById('netMarginSlider').value),
+                freight: parseFloat(document.getElementById('freightSlider').value),
+                customs: parseFloat(document.getElementById('customsSlider').value),
+                installation: parseFloat(document.getElementById('installationSlider').value),
+                exchange_rate: parseFloat(document.getElementById('exchangeRateSlider').value),
+                additional: parseFloat(document.getElementById('additionalSlider').value)
+            };
+            
+            try {
+                const response = await fetch('/costing', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        file_id: currentFileIdForCosting,
+                        factors: factors,
+                        table_data: tableData
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayCostedTable(result.result);
+                    showAlert('Costing applied successfully! 🎯', 'success');
+                } else {
+                    showAlert('Error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+        
+        // Extract table data from DOM
+        function extractTableData(table) {
+            const headers = [];
+            const rows = [];
+            
+            // Get headers from first row
+            const headerRow = table.rows[0];
+            for (let i = 0; i < headerRow.cells.length; i++) {
+                const cell = headerRow.cells[i];
+                // Skip action column
+                if (!cell.classList.contains('action-column-header')) {
+                    headers.push(cell.textContent.trim());
+                }
+            }
+            
+            // Get data rows (skip header row)
+            for (let i = 1; i < table.rows.length; i++) {
+                const row = table.rows[i];
+                const rowData = {};
+                let cellIndex = 0;
+                
+                for (let j = 0; j < row.cells.length; j++) {
+                    const cell = row.cells[j];
+                    // Skip action column
+                    if (!cell.classList.contains('action-column-cell')) {
+                        if (cellIndex < headers.length) {
+                            // Check if cell contains an image
+                            const imgElement = cell.querySelector('img');
+                            if (imgElement) {
+                                // Store the image HTML with src
+                                rowData[headers[cellIndex]] = cell.innerHTML;
+                            } else {
+                                // Store text content
+                                rowData[headers[cellIndex]] = cell.textContent.trim();
+                            }
+                            cellIndex++;
+                        }
+                    }
+                }
+                
+                rows.push(rowData);
+            }
+            
+            return {
+                headers: headers,
+                rows: rows
+            };
+        }
+        
+        // Display costed table
+        function displayCostedTable(tables) {
+            const previewSection = document.getElementById('costingPreview');
+            const tableContent = document.getElementById('costedTableContent');
+            
+            previewSection.style.display = 'block';
+            
+            let html = '';
+            tables.forEach((table, idx) => {
+                html += `<h3>Table ${idx + 1}</h3>`;
+                html += '<table style="width: 100%; border-collapse: collapse; margin: 20px 0;">';
+                html += '<tr>';
+                table.headers.forEach(header => {
+                    html += `<th style="border: 1px solid #ddd; padding: 12px; background: #667eea; color: white;">${header}</th>`;
+                });
+                html += '</tr>';
+                
+                table.rows.forEach(row => {
+                    html += '<tr>';
+                    table.headers.forEach(header => {
+                        let cellValue = row[header] || '';
+                        // Only show final costed value, no comparison
+                        html += `<td style="border: 1px solid #ddd; padding: 12px;">${cellValue}</td>`;
+                    });
+                    html += '</tr>';
+                });
+                
+                html += '</table>';
+            });
+            
+            tableContent.innerHTML = html;
+            
+            // Calculate summary
+            calculateCostingSummary(tables);
+        }
+        
+        // Calculate summary
+        function calculateCostingSummary(tables) {
+            const summarySection = document.getElementById('costingSummary');
+            
+            let subtotal = 0;
+            
+            // Calculate totals from all tables
+            tables.forEach(table => {
+                table.rows.forEach(row => {
+                    for (let key in row) {
+                        const keyLower = key.toLowerCase();
+                        // Look for total or amount columns (exclude _original fields)
+                        if ((keyLower.includes('total') || keyLower.includes('amount')) && !key.includes('_original')) {
+                            const valueStr = String(row[key]).replace(/[^0-9.-]/g, '');
+                            const value = parseFloat(valueStr);
+                            if (!isNaN(value) && value > 0) {
+                                subtotal += value;
+                            }
+                        }
+                    }
+                });
+            });
+            
+            const vat = subtotal * 0.05; // 5% VAT
+            const grandTotal = subtotal + vat;
+            
+            summarySection.innerHTML = `
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span>${subtotal.toFixed(2)}</span>
+                </div>
+                <div class="summary-row">
+                    <span>VAT (5%):</span>
+                    <span>${vat.toFixed(2)}</span>
+                </div>
+                <div class="summary-row grand-total">
+                    <span>Grand Total:</span>
+                    <span>${grandTotal.toFixed(2)}</span>
+                </div>
+            `;
+        }
+        
+        // Generate offer
+        async function generateOffer() {
+            if (!currentFileIdForCosting) {
+                showAlert('Please select a table first', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/generate-offer/${currentFileIdForCosting}`, {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('Offer generated successfully! 📄', 'success');
+                    window.open(`/download/offer/${currentFileIdForCosting}?format=pdf`, '_blank');
+                } else {
+                    showAlert('Error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+        
+        // Generate presentation
+        async function generatePresentation() {
+            if (!currentFileIdForCosting) {
+                showAlert('Please select a table first', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/generate-presentation/${currentFileIdForCosting}`, {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('Presentation generated successfully! 🎨', 'success');
+                    window.open(`/download/presentation/${currentFileIdForCosting}?format=pdf`, '_blank');
+                } else {
+                    showAlert('Error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+        
+        // Generate MAS
+        async function generateMAS() {
+            if (!currentFileIdForCosting) {
+                showAlert('Please select a table first', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/generate-mas/${currentFileIdForCosting}`, {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('MAS generated successfully! 📋', 'success');
+                    window.open(`/download/mas/${currentFileIdForCosting}?format=pdf`, '_blank');
+                } else {
+                    showAlert('Error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+        
+        // Value engineering
+        async function valueEngineering() {
+            if (!currentFileIdForCosting) {
+                showAlert('Please select a table first', 'error');
+                return;
+            }
+            
+            const budgetOption = prompt('Select budget option:\n1. Budgetary\n2. Medium Range\n3. High End', '2');
+            const options = {'1': 'budgetary', '2': 'medium', '3': 'high_end'};
+            
+            if (!budgetOption || !options[budgetOption]) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/value-engineering/${currentFileIdForCosting}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        budget_option: options[budgetOption]
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('Value engineering alternatives generated! 💡', 'success');
+                    // Display alternatives
+                } else {
+                    showAlert('Error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+        
+        // Initialize costing sliders on page load
+        initializeCostingSliders();
         
         // Load files on page load
         loadFileList();
