@@ -3,6 +3,7 @@ from reportlab.lib.pagesizes import letter, A4
 from reportlab.lib import colors
 from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image as RLImage
+from reportlab.pdfgen import canvas
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
 import json
@@ -22,7 +23,7 @@ class OfferGenerator:
             'CustomTitle',
             parent=self.styles['Heading1'],
             fontSize=24,
-            textColor=colors.HexColor('#667eea'),
+            textColor=colors.HexColor('#1a365d'),
             spaceAfter=30,
             alignment=TA_CENTER
         )
@@ -31,9 +32,53 @@ class OfferGenerator:
             'CustomHeader',
             parent=self.styles['Heading2'],
             fontSize=16,
-            textColor=colors.HexColor('#764ba2'),
+            textColor=colors.HexColor('#1a365d'),
             spaceAfter=12
         )
+
+    def _get_logo_path(self):
+        """Return the best available logo path."""
+        candidates = [
+            os.path.join('static', 'images', 'AlShaya-Logo-color@2x.png'),
+            os.path.join('static', 'images', 'LOGO.png'),
+            os.path.join('static', 'images', 'al-shaya-logo-white@2x.png')
+        ]
+        for p in candidates:
+            if os.path.exists(p):
+                return p
+        return None
+
+    def _draw_header_footer(self, canv: canvas.Canvas, doc):
+        """Draw top-right logo and footer on every page."""
+        page_width, page_height = doc.pagesize
+        gold = colors.HexColor('#d4af37')
+        dark = colors.HexColor('#1a365d')
+
+        # Top separator line
+        canv.setStrokeColor(gold)
+        canv.setLineWidth(2)
+        canv.line(doc.leftMargin, page_height - doc.topMargin + 10, page_width - doc.rightMargin, page_height - doc.topMargin + 10)
+
+        # Logo top-right
+        logo_path = self._get_logo_path()
+        if logo_path and os.path.exists(logo_path):
+            try:
+                logo_w = 100  # px points
+                logo_h = 100
+                x = page_width - doc.rightMargin - logo_w
+                y = page_height - doc.topMargin + 14
+                canv.drawImage(logo_path, x, y, width=logo_w, height=logo_h, preserveAspectRatio=True, mask='auto')
+            except Exception:
+                pass
+
+        # Footer website
+        canv.setFillColor(dark)
+        canv.setFont('Helvetica', 9)
+        footer_text = 'https://alshayaenterprises.com'
+        canv.drawRightString(page_width - doc.rightMargin, doc.bottomMargin - 12, footer_text)
+        canv.setStrokeColor(gold)
+        canv.setLineWidth(1)
+        canv.line(doc.leftMargin, doc.bottomMargin - 8, page_width - doc.rightMargin, doc.bottomMargin - 8)
     
     def generate(self, file_id, session):
         """
@@ -62,22 +107,24 @@ class OfferGenerator:
         # Generate PDF
         output_file = os.path.join(output_dir, f'offer_{file_id}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf')
         
-        doc = SimpleDocTemplate(output_file, pagesize=A4)
+        doc = SimpleDocTemplate(output_file, pagesize=A4,
+                    topMargin=0.6*inch, bottomMargin=0.6*inch,
+                    leftMargin=0.6*inch, rightMargin=0.6*inch)
         story = []
         
         # Title
-        title = Paragraph("COMMERCIAL OFFER", self.title_style)
+        title = Paragraph('<font color="#1a365d">COMMERCIAL OFFER</font>', self.title_style)
         story.append(title)
         story.append(Spacer(1, 0.3*inch))
         
         # Company info (placeholder)
-        company_info = Paragraph("""
-            <b>Company Name</b><br/>
-            Address Line 1<br/>
-            Address Line 2<br/>
-            Tel: +XXX XXX XXXX<br/>
-            Email: info@company.com
-        """, self.styles['Normal'])
+        company_info = Paragraph(
+            """
+            <b><font color="#1a365d">ALSHAYA ENTERPRISES</font></b><br/>
+            <font color="#475569">P.O. Box 4451, Kuwait City</font><br/>
+            <font color="#475569">Tel: +965 XXX XXXX | Email: info@alshayaenterprises.com</font>
+        """,
+            self.styles['Normal'])
         story.append(company_info)
         story.append(Spacer(1, 0.3*inch))
         
@@ -102,7 +149,7 @@ class OfferGenerator:
         
         # Tables with images
         for idx, table_data in enumerate(costed_data['tables']):
-            header = Paragraph(f"<b>Item List {idx + 1}</b>", self.header_style)
+            header = Paragraph(f"<b><font color='#1a365d'>Item List {idx + 1}</font></b>", self.header_style)
             story.append(header)
             story.append(Spacer(1, 0.2*inch))
             
@@ -118,16 +165,18 @@ class OfferGenerator:
             # Prepare table data with images
             table_rows = []
             
-            # Headers - clean and format
+            # Headers - clean and format, exclude Action column
             headers = table_data['headers']
-            header_row = [Paragraph(f"<b>{h}</b>", self.styles['Normal']) for h in headers]
+            # Filter out Action/Actions column
+            filtered_headers = [h for h in headers if h.lower() not in ['action', 'actions']]
+            header_row = [Paragraph(f"<b>{h}</b>", self.styles['Normal']) for h in filtered_headers]
             table_rows.append(header_row)
             
             # Data rows - show only final costed prices with images
             for row in table_data['rows']:
                 table_row = []
                 
-                for h in headers:
+                for h in filtered_headers:
                     cell_value = row.get(h, '')
                     
                     # Skip original price fields
@@ -144,13 +193,15 @@ class OfferGenerator:
                                 img = RLImage(image_path, width=1*inch, height=1*inch)
                                 table_row.append(img)
                             except Exception as e:
-                                # If image fails, show text instead
-                                table_row.append(Paragraph(str(cell_value), self.styles['Normal']))
+                                # If image fails, show placeholder text
+                                table_row.append(Paragraph("[Image]", self.styles['Normal']))
                         else:
-                            table_row.append(Paragraph(str(cell_value), self.styles['Normal']))
+                            # Image not found, show placeholder
+                            table_row.append(Paragraph("[Image]", self.styles['Normal']))
                     else:
                         # Regular text cell - use final costed value only
-                        final_value = str(cell_value)
+                        # Strip any HTML tags that might remain
+                        final_value = re.sub(r'<[^>]+>', '', str(cell_value))
                         
                         # Format numbers nicely
                         if self.is_numeric_column(h):
@@ -164,15 +215,15 @@ class OfferGenerator:
                 
                 table_rows.append(table_row)
             
-            # Create ReportLab table with appropriate column widths
-            col_widths = self.calculate_column_widths(headers, len(headers))
+            # Create ReportLab table with appropriate column widths using filtered headers
+            col_widths = self.calculate_column_widths(filtered_headers, len(filtered_headers))
             t = Table(table_rows, colWidths=col_widths, repeatRows=1)
             
             # Enhanced table styling
             table_style = TableStyle([
                 # Header styling
-                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#667eea')),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#d4af37')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
                 ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
                 ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
                 ('FONTSIZE', (0, 0), (-1, 0), 9),
@@ -204,7 +255,7 @@ class OfferGenerator:
             story.append(Spacer(1, 0.4*inch))
         
         # Summary with updated VAT (5%)
-        summary_header = Paragraph("<b>SUMMARY</b>", self.header_style)
+        summary_header = Paragraph("<b><font color='#1a365d'>SUMMARY</font></b>", self.header_style)
         story.append(summary_header)
         story.append(Spacer(1, 0.2*inch))
         
@@ -228,8 +279,8 @@ class OfferGenerator:
             ('FONTSIZE', (0, 0), (-1, 2), 11),
             ('FONTNAME', (0, 3), (-1, 3), 'Helvetica-Bold'),
             ('FONTSIZE', (0, 3), (-1, 3), 14),
-            ('TEXTCOLOR', (0, 3), (-1, 3), colors.HexColor('#667eea')),
-            ('LINEABOVE', (0, 3), (-1, 3), 2, colors.HexColor('#667eea')),
+            ('TEXTCOLOR', (0, 3), (-1, 3), colors.HexColor('#1a365d')),
+            ('LINEABOVE', (0, 3), (-1, 3), 2, colors.HexColor('#d4af37')),
             ('TOPPADDING', (0, 3), (-1, 3), 10),
         ])
         summary_table.setStyle(summary_style)
@@ -247,7 +298,7 @@ class OfferGenerator:
         story.append(terms)
         
         # Build PDF
-        doc.build(story)
+        doc.build(story, onFirstPage=self._draw_header_footer, onLaterPages=self._draw_header_footer)
         
         return output_file
     
@@ -280,8 +331,13 @@ class OfferGenerator:
             match = re.search(r'src=["\']([^"\']+)["\']', str(cell_value))
             if match:
                 img_relative_path = match.group(1)
-                # Convert to absolute path
-                img_path = os.path.join('outputs', session_id, file_id, img_relative_path)
+                # Remove leading slash if present
+                img_relative_path = img_relative_path.lstrip('/')
+                # Build absolute path from workspace root
+                if img_relative_path.startswith('outputs'):
+                    img_path = img_relative_path
+                else:
+                    img_path = os.path.join('outputs', session_id, file_id, img_relative_path)
                 return img_path
             
             # Try to find image reference in text

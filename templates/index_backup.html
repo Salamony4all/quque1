@@ -1,0 +1,2047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questemate - Professional BOQ Extraction & Estimation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            padding: 40px;
+        }
+        
+        .card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 10px;
+            padding: 60px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f0f0f0;
+        }
+        
+        .upload-area.dragover {
+            background: #e3e8ff;
+            border-color: #764ba2;
+        }
+        
+        .upload-icon {
+            font-size: 4em;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        
+        .upload-text {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .upload-subtext {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .file-list {
+            margin-top: 30px;
+        }
+        
+        .file-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .file-item:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+        
+        .file-info {
+            flex: 1;
+        }
+        
+        .file-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+        
+        .file-status {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .file-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+        
+        .thumbnail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .thumbnail {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .thumbnail:hover {
+            border-color: #667eea;
+            transform: scale(1.05);
+        }
+        
+        .thumbnail img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .thumbnail-label {
+            padding: 10px;
+            background: #f8f9fa;
+            text-align: center;
+            font-size: 0.9em;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content img {
+            max-width: 100%;
+            max-height: 80vh;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 30px;
+            cursor: pointer;
+            color: #333;
+        }
+        
+        .extraction-preview {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            border: 2px solid #e3e8ff;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+        }
+        
+        #extractedTablesContainer {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+            vertical-align: top;
+        }
+        
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        tr:hover {
+            background: #e3e8ff;
+        }
+        
+        td img {
+            max-width: 100px;
+            height: auto;
+            border-radius: 4px;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Hide floating controls when printing */
+        @media print {
+            .action-column-header,
+            .action-column-cell {
+                display: none !important;
+            }
+            .action-btn {
+                display: none !important;
+            }
+        }
+        
+        /* Costing Card Styles */
+        .costing-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 20px;
+        }
+        
+        .factor-control {
+            margin-bottom: 25px;
+        }
+        
+        .factor-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .factor-value {
+            color: #667eea;
+            font-size: 1.2em;
+            min-width: 80px;
+            text-align: right;
+        }
+        
+        .slider-container {
+            position: relative;
+            width: 100%;
+        }
+        
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #d3d3d3;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            border: none;
+        }
+        
+        .costing-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .preview-section {
+            margin-top: 30px;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        
+        .summary-section {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            font-size: 1.1em;
+        }
+        
+        .summary-row.grand-total {
+            font-weight: 700;
+            font-size: 1.3em;
+            border-top: 2px solid #333;
+            margin-top: 10px;
+            padding-top: 15px;
+        }
+        
+        .price-changed {
+            color: #28a745;
+            font-weight: 600;
+        }
+        
+        .price-original {
+            color: #999;
+            text-decoration: line-through;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Questemate</h1>
+            <p>Professional BOQ Extraction & Estimation System</p>
+        </header>
+        
+        <div class="main-content">
+            <!-- TEST BUTTON -->
+            <div style="padding: 10px; background: yellow; margin-bottom: 20px; text-align: center;">
+                <button onclick="alert('JavaScript works!'); console.log('Test button clicked');" style="padding: 10px 20px; font-size: 16px; background: #4caf50; color: white; border: none; cursor: pointer; border-radius: 5px;">
+                    🧪 TEST BUTTON - Click Me!
+                </button>
+            </div>
+            
+            <!-- Upload Section -->
+            <div class="card">
+                <h2>📤 Upload Files</h2>
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📁</div>
+                    <div class="upload-text">Drag & Drop files here</div>
+                    <div class="upload-subtext">or click to browse (PDF, XLS, XLSX, JPG, PNG)</div>
+                    <input type="file" id="fileInput" accept=".pdf,.xls,.xlsx,.jpg,.jpeg,.png" multiple>
+                </div>
+                
+                <div class="progress-bar" id="uploadProgress">
+                    <div class="progress-fill" id="uploadProgressFill">0%</div>
+                </div>
+                
+                <div style="margin-top: 20px; text-align: center;">
+                    <button class="btn btn-danger" onclick="cleanupFiles()">🗑️ Clear All Files</button>
+                </div>
+            </div>
+            
+            <!-- Uploaded Files List -->
+            <div class="card">
+                <h2>📋 Uploaded Files</h2>
+                <div class="file-list" id="fileList">
+                    <p style="text-align: center; color: #666;">No files uploaded yet</p>
+                </div>
+            </div>
+            
+            <!-- Extracted Tables Section -->
+            <div class="card" id="extractedTablesCard" style="display:none;">
+                <h2>📊 Extracted Tables</h2>
+                <div id="extractedTablesContainer"></div>
+            </div>
+            
+            <!-- Costing Card Section -->
+            <div class="card" id="costingCard" style="display:none;">
+                <h2>💰 Apply Costing Factors</h2>
+                <div class="costing-card">
+                    <div class="factor-control">
+                        <div class="factor-label">
+                            <span>Net Margin (%)</span>
+                            <span class="factor-value" id="netMarginValue">0%</span>
+                        </div>
+                        <input type="range" min="0" max="100" value="0" step="0.5" class="slider" id="netMarginSlider">
+                    </div>
+                    
+                    <div class="factor-control">
+                        <div class="factor-label">
+                            <span>Freight (%)</span>
+                            <span class="factor-value" id="freightValue">0%</span>
+                        </div>
+                        <input type="range" min="0" max="50" value="0" step="0.5" class="slider" id="freightSlider">
+                    </div>
+                    
+                    <div class="factor-control">
+                        <div class="factor-label">
+                            <span>Customs (%)</span>
+                            <span class="factor-value" id="customsValue">0%</span>
+                        </div>
+                        <input type="range" min="0" max="50" value="0" step="0.5" class="slider" id="customsSlider">
+                    </div>
+                    
+                    <div class="factor-control">
+                        <div class="factor-label">
+                            <span>Installation (%)</span>
+                            <span class="factor-value" id="installationValue">0%</span>
+                        </div>
+                        <input type="range" min="0" max="50" value="0" step="0.5" class="slider" id="installationSlider">
+                    </div>
+                    
+                    <div class="factor-control">
+                        <div class="factor-label">
+                            <span>Exchange Rate</span>
+                            <span class="factor-value" id="exchangeRateValue">1.00</span>
+                        </div>
+                        <input type="range" min="0.1" max="10" value="1" step="0.01" class="slider" id="exchangeRateSlider">
+                    </div>
+                    
+                    <div class="factor-control">
+                        <div class="factor-label">
+                            <span>Additional (%)</span>
+                            <span class="factor-value" id="additionalValue">0%</span>
+                        </div>
+                        <input type="range" min="0" max="50" value="0" step="0.5" class="slider" id="additionalSlider">
+                    </div>
+                    
+                    <div class="costing-actions">
+                        <button class="btn btn-primary" onclick="applyCosting()">🎯 Apply Costing</button>
+                        <button class="btn btn-success" onclick="generateOffer()">📄 Generate Offer</button>
+                        <button class="btn btn-info" onclick="generatePresentation()">🎨 Generate Presentation</button>
+                        <button class="btn btn-warning" onclick="generateMAS()">📋 Generate MAS</button>
+                        <button class="btn btn-info" onclick="valueEngineering()">💡 Value Engineering</button>
+                    </div>
+                    
+                    <div class="preview-section" id="costingPreview" style="display:none;">
+                        <h3>Costed BOQ Preview</h3>
+                        <div id="costedTableContent"></div>
+                        <div class="summary-section" id="costingSummary"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Image Modal -->
+    <div class="modal" id="imageModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <img id="modalImage" style="max-width: 100%; height: auto;">
+        </div>
+    </div>
+    
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        const uploadProgress = document.getElementById('uploadProgress');
+        const uploadProgressFill = document.getElementById('uploadProgressFill');
+        
+        // Click to upload
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+        
+        async function handleFiles(files) {
+            for (let file of files) {
+                await uploadFile(file);
+            }
+            loadFileList();
+        }
+        
+        async function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            uploadProgress.style.display = 'block';
+            
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('File uploaded successfully!', 'success');
+                    uploadProgressFill.style.width = '100%';
+                    uploadProgressFill.textContent = '100%';
+                } else {
+                    showAlert('Upload failed: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showAlert('Upload error: ' + error.message, 'error');
+            }
+            
+            setTimeout(() => {
+                uploadProgress.style.display = 'none';
+                uploadProgressFill.style.width = '0%';
+            }, 2000);
+        }
+        
+        async function loadFileList() {
+            try {
+                const response = await fetch('/files');
+                const data = await response.json();
+                
+                if (data.files && data.files.length > 0) {
+                    fileList.innerHTML = '';
+                    data.files.forEach(file => {
+                        const fileItem = createFileItem(file);
+                        fileList.appendChild(fileItem);
+                    });
+                } else {
+                    fileList.innerHTML = '<p style="text-align: center; color: #666;">No files uploaded yet</p>';
+                }
+            } catch (error) {
+                console.error('Error loading files:', error);
+            }
+        }
+        
+        function createFileItem(file) {
+            const div = document.createElement('div');
+            div.className = 'file-item';
+            div.id = `file-${file.id}`;
+            
+            div.innerHTML = `
+                <div class="file-info">
+                    <div class="file-name">${file.original_name}</div>
+                    <div class="file-status">Status: ${file.status}</div>
+                </div>
+                <div class="file-actions">
+                    <button class="action-btn btn-primary" onclick="extractTable('${file.id}')">🎯 Extract</button>
+                    <button class="action-btn btn-success" onclick="openCosting('${file.id}')">💰 Costing</button>
+                    <button class="action-btn btn-info" onclick="downloadExtracted('${file.id}', 'excel')" style="display:none;" id="download-${file.id}">📥 Excel</button>
+                    <button class="action-btn btn-danger" onclick="deleteFile('${file.id}')">🗑️ Delete</button>
+                </div>
+            `;
+            
+            return div;
+        }
+        
+        async function extractTable(fileId) {
+            // Show the extracted tables card
+            const extractedTablesCard = document.getElementById('extractedTablesCard');
+            const extractedTablesContainer = document.getElementById('extractedTablesContainer');
+            
+            // Create a section for this file's extraction
+            let extractionSection = document.getElementById(`extraction-${fileId}`);
+            if (!extractionSection) {
+                extractionSection = document.createElement('div');
+                extractionSection.id = `extraction-${fileId}`;
+                extractionSection.className = 'extraction-preview';
+                extractedTablesContainer.appendChild(extractionSection);
+            }
+            
+            extractedTablesCard.style.display = 'block';
+            extractionSection.style.display = 'block';
+            extractionSection.innerHTML = '<div class="loading"></div> Extracting table data...';
+            
+            // Scroll to extracted tables section
+            extractedTablesCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            try {
+                const response = await fetch(`/extract/${fileId}`, {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayExtractionResult(fileId, result.result);
+                    showAlert('Extraction completed!', 'success');
+                    
+                    // Show download button
+                    const downloadBtn = document.getElementById(`download-${fileId}`);
+                    if (downloadBtn) {
+                        downloadBtn.style.display = 'inline-block';
+                    }
+                    
+                    // Update file status
+                    const fileStatusElem = document.querySelector(`#file-${fileId} .file-status`);
+                    if (fileStatusElem) {
+                        fileStatusElem.textContent = 'Status: extracted';
+                        fileStatusElem.style.color = '#28a745';
+                        fileStatusElem.style.fontWeight = '600';
+                    }
+                    
+                    // Automatically stitch tables after extraction
+                    setTimeout(() => {
+                        stitchTables(fileId);
+                    }, 500);
+                } else {
+                    extractionSection.innerHTML = `<div class="alert-error">Error: ${result.error}</div>`;
+                }
+            } catch (error) {
+                extractionSection.innerHTML = `<div class="alert-error">Error: ${error.message}</div>`;
+            }
+        }
+        
+        function displayExtractionResult(fileId, result) {
+            const extractionSection = document.getElementById(`extraction-${fileId}`);
+            
+            // Get filename for display
+            const fileNameElem = document.querySelector(`#file-${fileId} .file-name`);
+            const fileName = fileNameElem ? fileNameElem.textContent : 'File';
+            
+            let html = `
+                <div style="border-left: 4px solid #667eea; padding-left: 20px; margin-bottom: 30px;">
+                    <h3 style="color: #667eea; margin-bottom: 10px;">📄 ${fileName}</h3>
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                        <button class="action-btn btn-info" onclick="downloadExtracted('${fileId}', 'excel')">� Download Raw Data</button>
+                        <button class="action-btn btn-success" onclick="openCosting('${fileId}')">� Apply Costing</button>
+                        <button class="action-btn" onclick="toggleRawData('${fileId}')" id="toggle-raw-${fileId}" style="background: #6c757d; color: white;">👁️ Show Raw Data</button>
+                    </div>
+                    <div id="stitch-result-${fileId}" style="display:none;"></div>
+                    <div id="raw-data-${fileId}" style="display:none;">
+                        <h4 style="color: #764ba2; margin-top: 20px;">Raw Extraction Data (All Pages)</h4>
+            `;
+            
+            // Handle the prunedResult format from PP-StructureV3 - but hide it by default
+            result.layoutParsingResults.forEach((layoutResult, idx) => {
+                html += `<div style="margin-bottom: 30px;"><h4 style="color: #764ba2;">Page ${idx + 1}</h4>`;
+                
+                // Check if prunedResult exists
+                const prunedResult = layoutResult.prunedResult;
+                if (prunedResult && prunedResult.parsing_res_list) {
+                    // Process each block in the parsing results
+                    prunedResult.parsing_res_list.forEach((block, blockIdx) => {
+                        if (block.block_label === 'table' && block.block_content) {
+                            // Render table content
+                            let tableContent = block.block_content;
+                            
+                            // Extract and render HTML tables
+                            let tempDiv = document.createElement('div');
+                            tempDiv.innerHTML = tableContent;
+                            
+                            // Style all tables
+                            tempDiv.querySelectorAll('table').forEach(table => {
+                                table.style.width = '100%';
+                                table.style.borderCollapse = 'collapse';
+                                table.style.marginTop = '20px';
+                                table.style.marginBottom = '20px';
+                                table.setAttribute('border', '1');
+                                
+                                // Style cells
+                                table.querySelectorAll('td, th').forEach(cell => {
+                                    cell.style.border = '1px solid #ddd';
+                                    cell.style.padding = '12px';
+                                    cell.style.textAlign = 'left';
+                                    cell.style.verticalAlign = 'middle';
+                                });
+                                
+                                // Style header row
+                                table.querySelectorAll('th').forEach(th => {
+                                    th.style.backgroundColor = '#667eea';
+                                    th.style.color = 'white';
+                                    th.style.fontWeight = '600';
+                                });
+                                
+                                // Alternate row colors
+                                let rows = table.querySelectorAll('tr');
+                                rows.forEach((row, i) => {
+                                    if (i > 0 && i % 2 === 0) {
+                                        row.style.backgroundColor = '#f8f9fa';
+                                    }
+                                });
+                                
+                                // Style images inside table cells
+                                table.querySelectorAll('img').forEach(img => {
+                                    img.style.maxWidth = '150px';
+                                    img.style.maxHeight = '150px';
+                                    img.style.width = 'auto';
+                                    img.style.height = 'auto';
+                                    img.style.display = 'block';
+                                    img.style.margin = '5px auto';
+                                    img.style.borderRadius = '4px';
+                                    img.style.cursor = 'pointer';
+                                    img.style.objectFit = 'contain';
+                                    
+                                    // Add click to enlarge
+                                    img.onclick = function() {
+                                        showImage(this.src);
+                                    };
+                                });
+                            });
+                            
+                            html += `<div style="overflow-x: auto;">${tempDiv.innerHTML}</div>`;
+                        } else if (block.block_content) {
+                            // Render other content types as formatted text
+                            html += `<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;"><strong>${block.block_label}:</strong><br><pre style="white-space: pre-wrap; margin-top: 10px;">${block.block_content}</pre></div>`;
+                        }
+                    });
+                } else if (layoutResult.markdown && layoutResult.markdown.text) {
+                    // Fallback to markdown format if prunedResult is not available
+                    let markdownText = layoutResult.markdown.text;
+                    
+                    if (markdownText.includes('<table') || markdownText.includes('<html>')) {
+                        let tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = markdownText;
+                        
+                        tempDiv.querySelectorAll('table').forEach(table => {
+                            table.style.width = '100%';
+                            table.style.borderCollapse = 'collapse';
+                            table.style.marginTop = '20px';
+                            table.style.marginBottom = '20px';
+                            table.setAttribute('border', '1');
+                            
+                            table.querySelectorAll('td, th').forEach(cell => {
+                                cell.style.border = '1px solid #ddd';
+                                cell.style.padding = '12px';
+                                cell.style.textAlign = 'left';
+                                cell.style.verticalAlign = 'middle';
+                            });
+                            
+                            table.querySelectorAll('th').forEach(th => {
+                                th.style.backgroundColor = '#667eea';
+                                th.style.color = 'white';
+                                th.style.fontWeight = '600';
+                            });
+                            
+                            let rows = table.querySelectorAll('tr');
+                            rows.forEach((row, i) => {
+                                if (i > 0 && i % 2 === 0) {
+                                    row.style.backgroundColor = '#f8f9fa';
+                                }
+                            });
+                            
+                            // Style images inside table cells
+                            table.querySelectorAll('img').forEach(img => {
+                                img.style.maxWidth = '150px';
+                                img.style.maxHeight = '150px';
+                                img.style.width = 'auto';
+                                img.style.height = 'auto';
+                                img.style.display = 'block';
+                                img.style.margin = '5px auto';
+                                img.style.borderRadius = '4px';
+                                img.style.cursor = 'pointer';
+                                img.style.objectFit = 'contain';
+                                
+                                // Add click to enlarge
+                                img.onclick = function() {
+                                    showImage(this.src);
+                                };
+                            });
+                        });
+                        
+                        let textContent = markdownText.replace(/<html>[\s\S]*?<\/html>/g, '');
+                        if (textContent.trim()) {
+                            html += `<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; white-space: pre-wrap;">${textContent}</div>`;
+                        }
+                        
+                        html += `<div style="overflow-x: auto;">${tempDiv.innerHTML}</div>`;
+                    } else {
+                        html += `<pre style="background: #f8f9fa; padding: 20px; border-radius: 8px; overflow-x: auto; white-space: pre-wrap;">${markdownText}</pre>`;
+                    }
+                }
+                html += '</div>'; // Close page div
+            });
+            
+            html += '</div>'; // Close raw-data div
+            html += '</div>'; // Close file extraction div
+            extractionSection.innerHTML = html;
+        }
+        
+        function toggleRawData(fileId) {
+            const rawDataDiv = document.getElementById(`raw-data-${fileId}`);
+            const toggleBtn = document.getElementById(`toggle-raw-${fileId}`);
+            
+            if (rawDataDiv.style.display === 'none') {
+                rawDataDiv.style.display = 'block';
+                toggleBtn.textContent = '👁️ Hide Raw Data';
+            } else {
+                rawDataDiv.style.display = 'none';
+                toggleBtn.textContent = '👁️ Show Raw Data';
+            }
+        }
+        
+        function openCosting(fileId) {
+            window.location.href = `/costing?file_id=${fileId}`;
+        }
+        
+        function downloadExtracted(fileId, format) {
+            window.open(`/download/extracted/${fileId}?format=${format}`, '_blank');
+        }
+        
+        async function stitchTables(fileId) {
+            const stitchResult = document.getElementById(`stitch-result-${fileId}`);
+            
+            // Show loading
+            stitchResult.style.display = 'block';
+            stitchResult.innerHTML = '<div class="loading"></div> Stitching tables from all pages...';
+            
+            try {
+                const response = await fetch(`/stitch-tables/${fileId}`, {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('Tables stitched successfully! You can now edit any cell or drag images between cells.', 'success');
+                    
+                    // Display stitched table
+                    let stitchedHtml = `
+                        <div style="background: #e8f5e9; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4caf50;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <div>
+                                    <h4 style="color: #2e7d32; margin: 0 0 5px 0;">✅ Stitched Table (Fully Editable)</h4>
+                                    <p style="margin: 0; color: #555; font-size: 0.9em;">
+                                        <strong>Total Rows:</strong> ${result.row_count} | <strong>Pages:</strong> ${result.page_count} 
+                                        | ✏️ Click cells to edit | 🖼️ Drag images | ➕ Add rows | × Delete rows
+                                    </p>
+                                </div>
+                            </div>
+                            <div id="editable-table-${fileId}" style="background: white; padding: 15px; border-radius: 4px; overflow-x: auto; box-shadow: 0 2px 8px rgba(0,0,0,0.1); max-width: 100%; position: relative;">
+                    `;
+                    
+                    // Parse and style the stitched table
+                    let tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = result.stitched_html;
+                    
+                    // Style the stitched table and make it editable
+                    tempDiv.querySelectorAll('table').forEach(table => {
+                        table.style.width = '100%';
+                        table.style.borderCollapse = 'collapse';
+                        table.style.marginTop = '10px';
+                        table.style.tableLayout = 'auto';
+                        table.style.position = 'relative';
+                        table.setAttribute('border', '1');
+                        table.setAttribute('id', `table-${fileId}`);
+                        
+                        table.querySelectorAll('td, th').forEach(cell => {
+                            cell.style.border = '1px solid #ddd';
+                            cell.style.padding = '8px';
+                            cell.style.textAlign = 'left';
+                            cell.style.verticalAlign = 'middle';
+                            cell.style.position = 'relative';
+                            cell.style.minHeight = '40px';
+                            cell.style.wordWrap = 'break-word';
+                            cell.style.overflowWrap = 'break-word';
+                            cell.style.cursor = 'text';
+                            
+                            // Don't set contenteditable here - we'll do it selectively later
+                        });
+                        
+                        // Style first row as header
+                        let firstRow = table.querySelector('tr');
+                        if (firstRow) {
+                            firstRow.querySelectorAll('td').forEach(cell => {
+                                cell.style.backgroundColor = '#4caf50';
+                                cell.style.color = 'white';
+                                cell.style.fontWeight = '600';
+                                cell.style.position = 'sticky';
+                                cell.style.top = '0';
+                                cell.style.zIndex = '10';
+                                cell.setAttribute('onblur', 'this.style.outline="none"; this.style.backgroundColor="#4caf50";');
+                            });
+                        }
+                        
+                        // Add action column to header
+                        let headerRow = table.rows[0];
+                        if (headerRow) {
+                            let actionHeader = document.createElement('td');
+                            actionHeader.className = 'action-column-header';
+                            actionHeader.textContent = 'Actions';
+                            actionHeader.contentEditable = 'false';
+                            actionHeader.style.cssText = 'width:100px;border:1px solid #ddd;background:#4caf50;color:white;font-weight:600;text-align:center;padding:8px;position:sticky;top:0;z-index:10;';
+                            headerRow.appendChild(actionHeader);
+                        }
+                        
+                        // Add action buttons to each data row
+                        for (let i = 1; i < table.rows.length; i++) {
+                            const row = table.rows[i];
+                            
+                            // First, make all existing cells in this row editable (before adding action column)
+                            for (let j = 0; j < row.cells.length; j++) {
+                                const cell = row.cells[j];
+                                cell.setAttribute('contenteditable', 'true');
+                                cell.setAttribute('ondrop', 'handleDrop(event)');
+                                cell.setAttribute('ondragover', 'handleDragOver(event)');
+                                cell.setAttribute('onfocus', 'this.style.outline="2px solid #2196F3"; this.style.backgroundColor="#fff9e6";');
+                                cell.setAttribute('onblur', 'this.style.outline="none"; this.style.backgroundColor="";');
+                            }
+                            
+                            // Now add action buttons (which will add a non-editable cell)
+                            addActionButtonsToRow(row, fileId);
+                        }
+                        
+                        // Setup table-level event delegation for all interactions
+                        setupTableEventDelegation(table);
+                        
+                        // Make images draggable
+                        table.querySelectorAll('img').forEach(img => {
+                            img.style.maxWidth = '100px';
+                            img.style.maxHeight = '100px';
+                            img.style.width = 'auto';
+                            img.style.height = 'auto';
+                            img.style.display = 'block';
+                            img.style.margin = '3px auto';
+                            img.style.borderRadius = '3px';
+                            img.style.cursor = 'move';
+                            img.style.objectFit = 'contain';
+                            img.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+                            img.style.transition = 'transform 0.2s, box-shadow 0.2s';
+                            
+                            // Make draggable
+                            img.setAttribute('draggable', 'true');
+                            img.setAttribute('ondragstart', 'handleDragStart(event)');
+                            img.setAttribute('ondragend', 'handleDragEnd(event)');
+                            
+                            // Click to enlarge
+                            img.onclick = function(e) {
+                                e.stopPropagation();
+                                showImage(this.src);
+                            };
+                            
+                            // Hover effect
+                            img.onmouseover = function() {
+                                this.style.transform = 'scale(1.05)';
+                                this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+                            };
+                            img.onmouseout = function() {
+                                this.style.transform = 'scale(1)';
+                                this.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+                            };
+                        });
+                    });
+                    
+                    stitchedHtml += tempDiv.innerHTML + `
+                            </div>
+                            <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                                <button class="action-btn btn-info" onclick="downloadEditedTable('${fileId}')">📥 Download Edited Table</button>
+                                <button class="action-btn btn-warning" onclick="addTableRow('${fileId}')">➕ Add Row at Bottom</button>
+                                <button class="action-btn btn-danger" onclick="resetTable('${fileId}')">🔄 Reset to Original</button>
+                                <button class="action-btn btn-success" onclick="openCosting('${fileId}')">💰 Apply Costing</button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    stitchResult.innerHTML = stitchedHtml;
+                    
+                    // Store original HTML for reset functionality
+                    window[`originalTable_${fileId}`] = tempDiv.innerHTML;
+                } else {
+                    stitchResult.innerHTML = `<div class="alert-error">Error: ${result.error}</div>`;
+                }
+            } catch (error) {
+                stitchResult.innerHTML = `<div class="alert-error">Error: ${error.message}</div>`;
+            }
+        }
+        
+        function downloadStitched(fileId) {
+            // This would download the stitched table as Excel
+            window.open(`/download/stitched/${fileId}?format=excel`, '_blank');
+        }
+        
+        async function deleteFile(fileId) {
+            if (!confirm('Are you sure you want to delete this file?')) return;
+            
+            try {
+                const response = await fetch(`/delete-file/${fileId}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('File deleted successfully', 'success');
+                    
+                    // Remove extraction preview if exists
+                    const extractionPreview = document.getElementById(`extraction-${fileId}`);
+                    if (extractionPreview) {
+                        extractionPreview.remove();
+                    }
+                    
+                    // Hide extracted tables card if no more extractions
+                    const extractedTablesContainer = document.getElementById('extractedTablesContainer');
+                    if (extractedTablesContainer && extractedTablesContainer.children.length === 0) {
+                        document.getElementById('extractedTablesCard').style.display = 'none';
+                    }
+                    
+                    loadFileList();
+                } else {
+                    showAlert('Delete failed: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showAlert('Delete error: ' + error.message, 'error');
+            }
+        }
+        
+        async function cleanupFiles() {
+            if (!confirm('This will delete all uploaded files. Continue?')) return;
+            
+            try {
+                const response = await fetch('/cleanup', {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('All files cleaned up', 'success');
+                    
+                    // Clear extracted tables
+                    const extractedTablesContainer = document.getElementById('extractedTablesContainer');
+                    if (extractedTablesContainer) {
+                        extractedTablesContainer.innerHTML = '';
+                    }
+                    document.getElementById('extractedTablesCard').style.display = 'none';
+                    
+                    loadFileList();
+                }
+            } catch (error) {
+                showAlert('Cleanup error: ' + error.message, 'error');
+            }
+        }
+        
+        function showImage(imagePath) {
+            const modal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            modalImage.src = imagePath;
+            modal.style.display = 'flex';
+        }
+        
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+        
+        // ==================== TABLE ROW MANAGEMENT FUNCTIONS ====================
+        
+        // Add action buttons to a table row
+        function addActionButtonsToRow(row, fileId) {
+            // Set row index for tracking
+            row.setAttribute('data-row-index', row.rowIndex);
+            row.style.position = 'relative';
+            
+            // Apply alternating row colors
+            if (row.rowIndex % 2 === 0) {
+                row.style.backgroundColor = '#f8f9fa';
+            }
+            
+            // Create action column cell
+            const actionCell = document.createElement('td');
+            actionCell.className = 'action-column-cell';
+            actionCell.style.cssText = 'width:100px;border:1px solid #ddd;background:#f0f0f0;padding:8px;text-align:center;vertical-align:middle;cursor:default;user-select:none;pointer-events:auto;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;';
+            
+            // Force contentEditable to false and prevent it from being changed
+            Object.defineProperty(actionCell, 'contentEditable', {
+                value: 'false',
+                writable: false,
+                configurable: false
+            });
+            actionCell.setAttribute('contenteditable', 'false');
+            actionCell.setAttribute('unselectable', 'on');
+            
+            // Prevent contenteditable from interfering
+            actionCell.addEventListener('mousedown', function(e) {
+                // Allow button/div clicks to pass through
+                if (e.target.className.includes('btn-')) {
+                    return true;
+                }
+                e.preventDefault();
+                return false;
+            });
+            
+            // Create buttons container
+            const btnContainer = document.createElement('div');
+            btnContainer.className = 'row-action-buttons';
+            btnContainer.contentEditable = 'false';
+            btnContainer.setAttribute('unselectable', 'on');
+            btnContainer.style.cssText = 'display:inline-block;white-space:nowrap;pointer-events:auto;z-index:9999;position:relative;'; // Always visible
+            
+            // Add row button
+            const addBtn = document.createElement('div');
+            addBtn.innerHTML = '➕';
+            addBtn.title = 'Add row below';
+            addBtn.className = 'btn-add-row';
+            addBtn.contentEditable = 'false';
+            addBtn.setAttribute('unselectable', 'on');
+            addBtn.setAttribute('data-file-id', fileId);
+            addBtn.style.cssText = 'display:inline-block;background:#4caf50;color:white;padding:8px 12px;margin:0 3px;cursor:pointer;border-radius:4px;font-size:18px;user-select:none;-webkit-user-select:none;';
+            
+            // Use setAttribute onclick - this works better with contenteditable
+            addBtn.setAttribute('onclick', `
+                event.stopPropagation();
+                const row = this.closest('tr');
+                const table = row.closest('table');
+                const fileId = this.getAttribute('data-file-id');
+                const newRowIndex = row.rowIndex + 1;
+                const columnCount = row.cells.length - 1;
+                const newRow = table.insertRow(newRowIndex);
+                for (let i = 0; i < columnCount; i++) {
+                    const cell = newRow.insertCell(i);
+                    cell.style.cssText = 'border:1px solid #ddd;padding:8px;text-align:left;vertical-align:middle;cursor:text;';
+                    cell.setAttribute('contenteditable', 'true');
+                    cell.setAttribute('ondrop', 'handleDrop(event)');
+                    cell.setAttribute('ondragover', 'handleDragOver(event)');
+                    cell.setAttribute('onfocus', 'this.style.outline="2px solid #2196F3";this.style.backgroundColor="#fff9e6";');
+                    cell.setAttribute('onblur', 'this.style.outline="none";this.style.backgroundColor="";');
+                }
+                addActionButtonsToRow(newRow, fileId);
+                showAlert('Row added! ➕', 'success');
+            `);
+            
+            // Delete row button
+            const delBtn = document.createElement('div');
+            delBtn.innerHTML = '🗑️';
+            delBtn.title = 'Delete row';
+            delBtn.className = 'btn-delete-row';
+            delBtn.contentEditable = 'false';
+            delBtn.setAttribute('unselectable', 'on');
+            delBtn.style.cssText = 'display:inline-block;background:#f44336;color:white;padding:8px 12px;margin:0 3px;cursor:pointer;border-radius:4px;font-size:18px;user-select:none;-webkit-user-select:none;';
+            
+            // Use setAttribute onclick - this works better with contenteditable
+            delBtn.setAttribute('onclick', `
+                event.stopPropagation();
+                const row = this.closest('tr');
+                const table = row.closest('table');
+                if (table.rows.length <= 2) {
+                    alert('Cannot delete the last row!');
+                    return false;
+                }
+                if (confirm('Delete this row?')) {
+                    row.remove();
+                    showAlert('Row deleted! 🗑️', 'success');
+                }
+            `);
+            
+            btnContainer.appendChild(addBtn);
+            btnContainer.appendChild(delBtn);
+            actionCell.appendChild(btnContainer);
+            row.appendChild(actionCell);
+        }
+        
+        // Setup event delegation for table interactions
+        function setupTableEventDelegation(table) {
+            // Handle button clicks
+            table.addEventListener('click', function(e) {
+                const target = e.target;
+                console.log('Table clicked:', target, 'Classes:', target.classList);
+                
+                if (target.classList.contains('btn-add-row')) {
+                    console.log('Add row button clicked!');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const row = target.closest('tr');
+                    const fileId = target.getAttribute('data-file-id');
+                    handleAddRow(row, fileId);
+                } else if (target.classList.contains('btn-delete-row')) {
+                    console.log('Delete row button clicked!');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const row = target.closest('tr');
+                    handleDeleteRow(row);
+                }
+            });
+            
+            // Handle row hover for visual feedback only
+            table.addEventListener('mouseover', function(e) {
+                const row = e.target.closest('tr');
+                if (row && row.rowIndex > 0) { // Skip header
+                    row.style.backgroundColor = '#e3f2fd';
+                }
+            });
+            
+            table.addEventListener('mouseout', function(e) {
+                const row = e.target.closest('tr');
+                if (row && row.rowIndex > 0) { // Skip header
+                    const rowIndex = row.rowIndex;
+                    row.style.backgroundColor = (rowIndex % 2 === 0) ? '#f8f9fa' : 'white';
+                }
+            });
+        }
+        
+        // Handle adding a new row below current row
+        function handleAddRow(currentRow, fileId) {
+            console.log('handleAddRow called with row:', currentRow, 'fileId:', fileId);
+            const table = currentRow.closest('table');
+            const newRowIndex = currentRow.rowIndex + 1;
+            const columnCount = currentRow.cells.length - 1; // Exclude action column
+            
+            console.log('Inserting new row at index:', newRowIndex, 'with', columnCount, 'columns');
+            
+            // Insert new row
+            const newRow = table.insertRow(newRowIndex);
+            newRow.style.position = 'relative';
+            
+            // Create data cells
+            for (let i = 0; i < columnCount; i++) {
+                const cell = newRow.insertCell(i);
+                cell.style.cssText = 'border:1px solid #ddd;padding:8px;text-align:left;vertical-align:middle;cursor:text;';
+                cell.setAttribute('contenteditable', 'true');
+                cell.setAttribute('ondrop', 'handleDrop(event)');
+                cell.setAttribute('ondragover', 'handleDragOver(event)');
+                cell.setAttribute('onfocus', 'this.style.outline="2px solid #2196F3";this.style.backgroundColor="#fff9e6";');
+                cell.setAttribute('onblur', 'this.style.outline="none";this.style.backgroundColor="";');
+                cell.textContent = '';
+            }
+            
+            // Add action buttons to new row
+            addActionButtonsToRow(newRow, fileId);
+            
+            // Reapply row colors
+            updateTableRowColors(table);
+            
+            showAlert('Row added successfully! ➕', 'success');
+        }
+        
+        // Handle deleting a row
+        function handleDeleteRow(row) {
+            console.log('handleDeleteRow called with row:', row);
+            const table = row.closest('table');
+            
+            // Prevent deleting if only header and one row remain
+            if (table.rows.length <= 2) {
+                showAlert('Cannot delete the last row!', 'error');
+                return;
+            }
+            
+            if (confirm('Delete this row?')) {
+                row.remove();
+                updateTableRowColors(table);
+                showAlert('Row deleted! 🗑️', 'success');
+            }
+        }
+        
+        // Update row colors and indices after row changes
+        function updateTableRowColors(table) {
+            Array.from(table.rows).forEach((row, index) => {
+                if (index === 0) return; // Skip header
+                
+                row.setAttribute('data-row-index', index);
+                row.style.backgroundColor = (index % 2 === 0) ? '#f8f9fa' : 'white';
+                
+                // Update cell blur handlers
+                row.querySelectorAll('td:not(.action-column-cell)').forEach(cell => {
+                    const bgColor = (index % 2 === 0) ? '#f8f9fa' : '';
+                    cell.setAttribute('onblur', `this.style.outline="none";this.style.backgroundColor="${bgColor}";`);
+                });
+            });
+        }
+        
+        // ==================== END TABLE ROW MANAGEMENT ====================
+        
+        // Drag and drop functionality for images
+        let draggedImage = null;
+        
+        function handleDragStart(event) {
+            draggedImage = event.target;
+            event.target.style.opacity = '0.5';
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('text/html', event.target.outerHTML);
+        }
+        
+        function handleDragEnd(event) {
+            event.target.style.opacity = '1';
+        }
+        
+        function handleDragOver(event) {
+            if (event.preventDefault) {
+                event.preventDefault();
+            }
+            event.dataTransfer.dropEffect = 'move';
+            
+            // Highlight drop target
+            if (event.currentTarget.tagName === 'TD') {
+                event.currentTarget.style.backgroundColor = '#bbdefb';
+            }
+            
+            return false;
+        }
+        
+        function handleDrop(event) {
+            if (event.stopPropagation) {
+                event.stopPropagation();
+            }
+            event.preventDefault();
+            
+            const targetCell = event.currentTarget;
+            
+            // Reset background
+            targetCell.style.backgroundColor = '';
+            
+            if (draggedImage && draggedImage.parentNode) {
+                // Remove image from source cell
+                const sourceCell = draggedImage.parentNode;
+                draggedImage.remove();
+                
+                // Add image to target cell
+                const newImg = document.createElement('img');
+                newImg.src = draggedImage.src;
+                newImg.style.cssText = draggedImage.style.cssText;
+                newImg.setAttribute('draggable', 'true');
+                newImg.setAttribute('ondragstart', 'handleDragStart(event)');
+                newImg.setAttribute('ondragend', 'handleDragEnd(event)');
+                newImg.onclick = function(e) {
+                    e.stopPropagation();
+                    showImage(this.src);
+                };
+                newImg.onmouseover = function() {
+                    this.style.transform = 'scale(1.05)';
+                    this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+                };
+                newImg.onmouseout = function() {
+                    this.style.transform = 'scale(1)';
+                    this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                };
+                
+                targetCell.appendChild(newImg);
+                
+                showAlert('Image moved successfully! 🖼️', 'success');
+            }
+            
+            return false;
+        }
+        
+        // Add new row to table
+        // Add new row at bottom of table (called by button)
+        function addTableRow(fileId) {
+            const table = document.getElementById(`table-${fileId}`);
+            if (!table) {
+                showAlert('Table not found', 'error');
+                return;
+            }
+            
+            const firstRow = table.querySelector('tr');
+            if (!firstRow) return;
+            
+            const columnCount = firstRow.querySelectorAll('td, th').length - 1; // Exclude action column
+            const newRow = table.insertRow(-1);
+            newRow.style.position = 'relative';
+            
+            // Create data cells
+            for (let i = 0; i < columnCount; i++) {
+                const cell = newRow.insertCell(i);
+                cell.style.cssText = 'border:1px solid #ddd;padding:8px;text-align:left;vertical-align:middle;cursor:text;';
+                cell.setAttribute('contenteditable', 'true');
+                cell.setAttribute('ondrop', 'handleDrop(event)');
+                cell.setAttribute('ondragover', 'handleDragOver(event)');
+                cell.setAttribute('onfocus', 'this.style.outline="2px solid #2196F3";this.style.backgroundColor="#fff9e6";');
+                cell.setAttribute('onblur', 'this.style.outline="none";this.style.backgroundColor="";');
+                cell.textContent = i === 0 ? (table.rows.length - 1) : '';
+            }
+            
+            // Add action buttons
+            addActionButtonsToRow(newRow, fileId);
+            updateTableRowColors(table);
+            
+            showAlert('Row added at bottom! ➕', 'success');
+        }
+        
+        // Reset table to original
+        function resetTable(fileId) {
+            if (!confirm('Are you sure you want to reset all changes? This cannot be undone.')) {
+                return;
+            }
+            
+            const tableContainer = document.getElementById(`editable-table-${fileId}`);
+            if (!tableContainer) {
+                showAlert('Table not found', 'error');
+                return;
+            }
+            
+            const originalHtml = window[`originalTable_${fileId}`];
+            if (originalHtml) {
+                tableContainer.innerHTML = originalHtml;
+                
+                // Reapply all styles and functionality
+                const table = tableContainer.querySelector('table');
+                if (table) {
+                    table.setAttribute('id', `table-${fileId}`);
+                    
+                    // Add hover effects to rows
+                    let rows = table.querySelectorAll('tr');
+                    rows.forEach((row, rowIndex) => {
+                        if (rowIndex === 0) return; // Skip header
+                        
+                        row.onmouseover = function() {
+                            this.style.backgroundColor = '#e3f2fd';
+                            showRowActions(this, fileId);
+                        };
+                        row.onmouseout = function() {
+                            if (rowIndex % 2 === 0) this.style.backgroundColor = '#f8f9fa';
+                            else this.style.backgroundColor = 'white';
+                        };
+                    });
+                    
+                    table.querySelectorAll('td, th').forEach(cell => {
+                        cell.setAttribute('contenteditable', 'true');
+                        cell.setAttribute('ondrop', 'handleDrop(event)');
+                        cell.setAttribute('ondragover', 'handleDragOver(event)');
+                        cell.style.cursor = 'text';
+                        cell.setAttribute('onfocus', 'this.style.outline="2px solid #2196F3"; this.style.backgroundColor="#fff9e6";');
+                        cell.setAttribute('onblur', 'this.style.outline="none"; this.style.backgroundColor="";');
+                    });
+                    
+                    // Style header
+                    let firstRow = table.querySelector('tr');
+                    if (firstRow) {
+                        firstRow.querySelectorAll('td').forEach(cell => {
+                            cell.setAttribute('onblur', 'this.style.outline="none"; this.style.backgroundColor="#4caf50";');
+                        });
+                    }
+                    
+                    table.querySelectorAll('img').forEach(img => {
+                        img.setAttribute('draggable', 'true');
+                        img.setAttribute('ondragstart', 'handleDragStart(event)');
+                        img.setAttribute('ondragend', 'handleDragEnd(event)');
+                        img.style.cursor = 'move';
+                    });
+                    
+                    reapplyRowColors(table);
+                }
+                
+                showAlert('Table reset to original! 🔄', 'success');
+            }
+        }
+        
+        // Download edited table
+        async function downloadEditedTable(fileId) {
+            const table = document.getElementById(`table-${fileId}`);
+            if (!table) {
+                showAlert('Table not found', 'error');
+                return;
+            }
+            
+            // Clone table and clean up for export
+            const clonedTable = table.cloneNode(true);
+            
+            // Remove action column header
+            let headerRow = clonedTable.rows[0];
+            if (headerRow) {
+                let actionHeader = headerRow.querySelector('.action-column-header');
+                if (actionHeader) actionHeader.remove();
+            }
+            
+            // Remove action column cells from all data rows
+            Array.from(clonedTable.rows).forEach((row, i) => {
+                if (i > 0) { // Skip header
+                    let actionCell = row.querySelector('.action-column-cell');
+                    if (actionCell) actionCell.remove();
+                }
+            });
+            
+            // Remove contenteditable and event handlers
+            clonedTable.querySelectorAll('[contenteditable]').forEach(el => {
+                el.removeAttribute('contenteditable');
+                el.removeAttribute('onfocus');
+                el.removeAttribute('onblur');
+                el.removeAttribute('ondrop');
+                el.removeAttribute('ondragover');
+            });
+            
+            clonedTable.querySelectorAll('img').forEach(img => {
+                img.removeAttribute('draggable');
+                img.removeAttribute('ondragstart');
+                img.removeAttribute('ondragend');
+            });
+            
+            // Create HTML file content
+            const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Edited BOQ Table</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 12px; text-align: left; vertical-align: middle; }
+        tr:first-child td { background-color: #4caf50; color: white; font-weight: 600; }
+        tr:nth-child(even) { background-color: #f8f9fa; }
+        img { max-width: 150px; max-height: 150px; display: block; margin: 5px auto; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>Bill of Quantities (BOQ)</h1>
+    <p>Edited and exported from BOQ Extraction System</p>
+    ${clonedTable.outerHTML}
+</body>
+</html>`;
+            
+            // Create download
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `edited_boq_${fileId}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showAlert('Edited table downloaded! 📥', 'success');
+        }
+        
+        function showAlert(message, type) {
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            
+            document.querySelector('.main-content').insertBefore(alert, document.querySelector('.card'));
+            
+            setTimeout(() => alert.remove(), 5000);
+        }
+        
+        // ======= COSTING FUNCTIONALITY =======
+        let currentFileIdForCosting = null;
+        
+        // Initialize costing sliders
+        function initializeCostingSliders() {
+            const sliders = {
+                netMargin: document.getElementById('netMarginSlider'),
+                freight: document.getElementById('freightSlider'),
+                customs: document.getElementById('customsSlider'),
+                installation: document.getElementById('installationSlider'),
+                exchangeRate: document.getElementById('exchangeRateSlider'),
+                additional: document.getElementById('additionalSlider')
+            };
+            
+            sliders.netMargin.addEventListener('input', (e) => {
+                document.getElementById('netMarginValue').textContent = e.target.value + '%';
+            });
+            
+            sliders.freight.addEventListener('input', (e) => {
+                document.getElementById('freightValue').textContent = e.target.value + '%';
+            });
+            
+            sliders.customs.addEventListener('input', (e) => {
+                document.getElementById('customsValue').textContent = e.target.value + '%';
+            });
+            
+            sliders.installation.addEventListener('input', (e) => {
+                document.getElementById('installationValue').textContent = e.target.value + '%';
+            });
+            
+            sliders.exchangeRate.addEventListener('input', (e) => {
+                document.getElementById('exchangeRateValue').textContent = parseFloat(e.target.value).toFixed(2);
+            });
+            
+            sliders.additional.addEventListener('input', (e) => {
+                document.getElementById('additionalValue').textContent = e.target.value + '%';
+            });
+        }
+        
+        // Open costing card (triggered from table actions)
+        function openCosting(fileId) {
+            currentFileIdForCosting = fileId;
+            const costingCard = document.getElementById('costingCard');
+            costingCard.style.display = 'block';
+            
+            // Scroll to costing card
+            costingCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            showAlert('Costing panel opened! Adjust factors and click Apply Costing 💰', 'success');
+        }
+        
+        // Apply costing factors
+        async function applyCosting() {
+            if (!currentFileIdForCosting) {
+                showAlert('Please select a table first by clicking "Apply Costing" button', 'error');
+                return;
+            }
+            
+            // Extract table data from DOM
+            const table = document.getElementById(`table-${currentFileIdForCosting}`);
+            if (!table) {
+                showAlert('Table not found in the page', 'error');
+                return;
+            }
+            
+            const tableData = extractTableData(table);
+            
+            const factors = {
+                net_margin: parseFloat(document.getElementById('netMarginSlider').value),
+                freight: parseFloat(document.getElementById('freightSlider').value),
+                customs: parseFloat(document.getElementById('customsSlider').value),
+                installation: parseFloat(document.getElementById('installationSlider').value),
+                exchange_rate: parseFloat(document.getElementById('exchangeRateSlider').value),
+                additional: parseFloat(document.getElementById('additionalSlider').value)
+            };
+            
+            try {
+                const response = await fetch('/costing', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        file_id: currentFileIdForCosting,
+                        factors: factors,
+                        table_data: tableData
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayCostedTable(result.result);
+                    showAlert('Costing applied successfully! 🎯', 'success');
+                } else {
+                    showAlert('Error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+        
+        // Extract table data from DOM
+        function extractTableData(table) {
+            const headers = [];
+            const rows = [];
+            
+            // Get headers from first row
+            const headerRow = table.rows[0];
+            for (let i = 0; i < headerRow.cells.length; i++) {
+                const cell = headerRow.cells[i];
+                // Skip action column
+                if (!cell.classList.contains('action-column-header')) {
+                    headers.push(cell.textContent.trim());
+                }
+            }
+            
+            // Get data rows (skip header row)
+            for (let i = 1; i < table.rows.length; i++) {
+                const row = table.rows[i];
+                const rowData = {};
+                let cellIndex = 0;
+                
+                for (let j = 0; j < row.cells.length; j++) {
+                    const cell = row.cells[j];
+                    // Skip action column
+                    if (!cell.classList.contains('action-column-cell')) {
+                        if (cellIndex < headers.length) {
+                            // Check if cell contains an image
+                            const imgElement = cell.querySelector('img');
+                            if (imgElement) {
+                                // Store the image HTML with src
+                                rowData[headers[cellIndex]] = cell.innerHTML;
+                            } else {
+                                // Store text content
+                                rowData[headers[cellIndex]] = cell.textContent.trim();
+                            }
+                            cellIndex++;
+                        }
+                    }
+                }
+                
+                rows.push(rowData);
+            }
+            
+            return {
+                headers: headers,
+                rows: rows
+            };
+        }
+        
+        // Display costed table
+        function displayCostedTable(tables) {
+            const previewSection = document.getElementById('costingPreview');
+            const tableContent = document.getElementById('costedTableContent');
+            
+            previewSection.style.display = 'block';
+            
+            let html = '';
+            tables.forEach((table, idx) => {
+                html += `<h3>Table ${idx + 1}</h3>`;
+                html += '<table style="width: 100%; border-collapse: collapse; margin: 20px 0;">';
+                html += '<tr>';
+                table.headers.forEach(header => {
+                    html += `<th style="border: 1px solid #ddd; padding: 12px; background: #667eea; color: white;">${header}</th>`;
+                });
+                html += '</tr>';
+                
+                table.rows.forEach(row => {
+                    html += '<tr>';
+                    table.headers.forEach(header => {
+                        let cellValue = row[header] || '';
+                        // Only show final costed value, no comparison
+                        html += `<td style="border: 1px solid #ddd; padding: 12px;">${cellValue}</td>`;
+                    });
+                    html += '</tr>';
+                });
+                
+                html += '</table>';
+            });
+            
+            tableContent.innerHTML = html;
+            
+            // Calculate summary
+            calculateCostingSummary(tables);
+        }
+        
+        // Calculate summary
+        function calculateCostingSummary(tables) {
+            const summarySection = document.getElementById('costingSummary');
+            
+            let subtotal = 0;
+            
+            // Calculate totals from all tables
+            tables.forEach(table => {
+                table.rows.forEach(row => {
+                    for (let key in row) {
+                        const keyLower = key.toLowerCase();
+                        // Look for total or amount columns (exclude _original fields)
+                        if ((keyLower.includes('total') || keyLower.includes('amount')) && !key.includes('_original')) {
+                            const valueStr = String(row[key]).replace(/[^0-9.-]/g, '');
+                            const value = parseFloat(valueStr);
+                            if (!isNaN(value) && value > 0) {
+                                subtotal += value;
+                            }
+                        }
+                    }
+                });
+            });
+            
+            const vat = subtotal * 0.05; // 5% VAT
+            const grandTotal = subtotal + vat;
+            
+            summarySection.innerHTML = `
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span>${subtotal.toFixed(2)}</span>
+                </div>
+                <div class="summary-row">
+                    <span>VAT (5%):</span>
+                    <span>${vat.toFixed(2)}</span>
+                </div>
+                <div class="summary-row grand-total">
+                    <span>Grand Total:</span>
+                    <span>${grandTotal.toFixed(2)}</span>
+                </div>
+            `;
+        }
+        
+        // Generate offer
+        async function generateOffer() {
+            if (!currentFileIdForCosting) {
+                showAlert('Please select a table first', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/generate-offer/${currentFileIdForCosting}`, {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('Offer generated successfully! 📄', 'success');
+                    window.open(`/download/offer/${currentFileIdForCosting}?format=pdf`, '_blank');
+                } else {
+                    showAlert('Error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+        
+        // Generate presentation
+        async function generatePresentation() {
+            if (!currentFileIdForCosting) {
+                showAlert('Please select a table first', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/generate-presentation/${currentFileIdForCosting}`, {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('Presentation generated successfully! 🎨', 'success');
+                    window.open(`/download/presentation/${currentFileIdForCosting}?format=pdf`, '_blank');
+                } else {
+                    showAlert('Error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+        
+        // Generate MAS
+        async function generateMAS() {
+            if (!currentFileIdForCosting) {
+                showAlert('Please select a table first', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/generate-mas/${currentFileIdForCosting}`, {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('MAS generated successfully! 📋', 'success');
+                    window.open(`/download/mas/${currentFileIdForCosting}?format=pdf`, '_blank');
+                } else {
+                    showAlert('Error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+        
+        // Value engineering
+        async function valueEngineering() {
+            if (!currentFileIdForCosting) {
+                showAlert('Please select a table first', 'error');
+                return;
+            }
+            
+            const budgetOption = prompt('Select budget option:\n1. Budgetary\n2. Medium Range\n3. High End', '2');
+            const options = {'1': 'budgetary', '2': 'medium', '3': 'high_end'};
+            
+            if (!budgetOption || !options[budgetOption]) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/value-engineering/${currentFileIdForCosting}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        budget_option: options[budgetOption]
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('Value engineering alternatives generated! 💡', 'success');
+                    // Display alternatives
+                } else {
+                    showAlert('Error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+        
+        // Initialize costing sliders on page load
+        initializeCostingSliders();
+        
+        // Load files on page load
+        loadFileList();
+    </script>
+</body>
+</html>

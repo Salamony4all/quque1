@@ -200,13 +200,21 @@ def before_request():
         session['session_id'] = str(uuid.uuid4())
         session['uploaded_files'] = []
         
-        # Clean up ALL other sessions when new session starts
+        # Clean up ALL other sessions when new session starts (aggressive)
+        try:
+            cleaned = cleanup_all_sessions()
+            if any(cleaned.values()):
+                logger.info(f"New session startup - cleaned all old sessions: {cleaned}")
+        except Exception as e:
+            logger.error(f"Error in new session cleanup: {e}")
+    else:
+        # For existing sessions, clean other sessions periodically
         try:
             cleaned = cleanup_other_sessions(session['session_id'])
             if any(cleaned.values()):
-                logger.info(f"New session cleanup (removed other sessions): {cleaned}")
+                logger.info(f"Existing session cleanup (removed other sessions): {cleaned}")
         except Exception as e:
-            logger.error(f"Error in new session cleanup: {e}")
+            logger.error(f"Error in existing session cleanup: {e}")
     
     # Create session-specific directories
     session_id = session['session_id']
@@ -216,6 +224,16 @@ def before_request():
 @app.route('/')
 def index():
     """Home page with upload functionality"""
+    # Clean up other sessions on every page load
+    try:
+        session_id = session.get('session_id')
+        if session_id:
+            cleaned = cleanup_other_sessions(session_id)
+            if any(cleaned.values()):
+                logger.info(f"Page load cleanup (removed other sessions): {cleaned}")
+    except Exception as e:
+        logger.error(f"Error in page load cleanup: {e}")
+    
     return render_template('index.html')
 
 @app.route('/upload', methods=['POST'])
@@ -700,14 +718,17 @@ def generate_offer(file_id):
 def generate_presentation(file_id):
     """Generate technical presentation"""
     try:
+        data = request.json or {}
+        format_type = data.get('format', 'pdf')
+        
         from utils.presentation_generator import PresentationGenerator
         generator = PresentationGenerator()
-        result = generator.generate(file_id, session)
+        result = generator.generate(file_id, session, format_type)
         
         return jsonify({
             'success': True,
             'file_path': result,
-            'message': 'Presentation generated successfully'
+            'message': f'Presentation generated successfully as {format_type.upper()}'
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -889,6 +910,36 @@ def admin_cleanup():
         })
     except Exception as e:
         logger.exception('Error in manual cleanup')
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/cleanup-session', methods=['POST'])
+def cleanup_session_api():
+    """API endpoint for cleaning up current session data"""
+    try:
+        cleanup_session_files()
+        return jsonify({
+            'success': True,
+            'message': 'Session data cleaned'
+        })
+    except Exception as e:
+        logger.exception('Error in session cleanup')
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/cleanup-all', methods=['POST'])
+def cleanup_all_api():
+    """API endpoint for cleaning all sessions (triggered on page load)"""
+    try:
+        session_id = session.get('session_id')
+        if session_id:
+            cleaned = cleanup_other_sessions(session_id)
+            return jsonify({
+                'success': True,
+                'message': 'Other sessions cleaned',
+                'cleaned': cleaned
+            })
+        return jsonify({'success': False, 'message': 'No active session'}), 400
+    except Exception as e:
+        logger.exception('Error in cleanup all')
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':

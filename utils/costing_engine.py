@@ -56,7 +56,8 @@ class CostingEngine:
         file_info['costed_data'] = {
             'factors': factors,
             'tables': updated_tables,
-            'original_table': table_data if table_data else tables_data[0]
+            'original_table': table_data if table_data else tables_data[0],
+            'session_id': session.get('session_id', '')
         }
         session.modified = True
         

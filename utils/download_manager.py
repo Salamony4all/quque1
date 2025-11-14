@@ -5,14 +5,28 @@ import pandas as pd
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 from openpyxl.utils.dataframe import dataframe_to_rows
+from openpyxl.drawing.image import Image as XLImage
 import shutil
 import zipfile
+import re
 
 class DownloadManager:
     """Manage downloads of all generated artifacts"""
     
     def __init__(self):
-        self.supported_formats = ['pdf', 'xlsx', 'xls', 'zip']
+        self.supported_formats = ['pdf', 'excel', 'xlsx', 'xls', 'pptx', 'zip']
+    
+    def get_logo_path(self):
+        """Return the best available logo path"""
+        candidates = [
+            os.path.join('static', 'images', 'AlShaya-Logo-color@2x.png'),
+            os.path.join('static', 'images', 'LOGO.png'),
+            os.path.join('static', 'images', 'al-shaya-logo-white@2x.png')
+        ]
+        for p in candidates:
+            if os.path.exists(p):
+                return p
+        return None
     
     def prepare_download(self, file_id, file_type, format_type, session):
         """
@@ -21,12 +35,16 @@ class DownloadManager:
         Args:
             file_id: ID of the file
             file_type: Type of file (extraction, offer, presentation, mas, ve)
-            format_type: Output format (pdf, xlsx, xls, zip)
+            format_type: Output format (pdf, excel, xlsx, xls, zip)
             session: Flask session object
         
         Returns:
             Path to the file to download
         """
+        # Normalize format type
+        if format_type == 'excel':
+            format_type = 'xlsx'
+        
         if format_type not in self.supported_formats:
             raise Exception(f'Unsupported format: {format_type}')
         
@@ -111,11 +129,18 @@ class DownloadManager:
         if not os.path.exists(presentation_dir):
             raise Exception('Presentation not generated yet')
         
-        pdf_files = [f for f in os.listdir(presentation_dir) if f.endswith('.pdf') and file_info['id'] in f]
-        if pdf_files:
-            return os.path.join(presentation_dir, pdf_files[0])
+        # Look for files with the correct extension
+        if format_type == 'pptx':
+            files = [f for f in os.listdir(presentation_dir) if f.endswith('.pptx') and file_info['id'] in f]
+        else:  # pdf
+            files = [f for f in os.listdir(presentation_dir) if f.endswith('.pdf') and file_info['id'] in f]
         
-        raise Exception('Presentation file not found')
+        if files:
+            # Return the most recent file
+            files.sort(reverse=True)
+            return os.path.join(presentation_dir, files[0])
+        
+        raise Exception(f'Presentation file ({format_type}) not found')
     
     def prepare_mas_download(self, file_info, format_type, session_id):
         """Prepare MAS for download"""
@@ -192,7 +217,25 @@ class DownloadManager:
         filename = os.path.join(output_dir, f'extraction_{file_id}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx')
         
         wb = Workbook()
-        wb.remove(wb.active)  # Remove default sheet
+        
+        # Add logo to first sheet if available
+        logo_path = self.get_logo_path()
+        if logo_path and os.path.exists(logo_path):
+            try:
+                ws_logo = wb.active
+                ws_logo.title = 'Cover'
+                img = XLImage(logo_path)
+                img.width = 200
+                img.height = 200 * (img.height / img.width)
+                ws_logo.add_image(img, 'B2')
+                ws_logo['B8'] = 'ALSHAYA ENTERPRISES'
+                ws_logo['B8'].font = Font(bold=True, size=16)
+                ws_logo['B9'] = 'Extracted Table Data'
+                ws_logo['B9'].font = Font(size=12)
+            except Exception:
+                wb.remove(wb.active)
+        else:
+            wb.remove(wb.active)  # Remove default sheet
         
         # Process each page
         for idx, layout_result in enumerate(extraction_result.get('layoutParsingResults', [])):
@@ -229,12 +272,26 @@ class DownloadManager:
         ws = wb.active
         ws.title = 'Offer'
         
+        # Add logo at top-right
+        logo_path = self.get_logo_path()
+        if logo_path and os.path.exists(logo_path):
+            try:
+                img = XLImage(logo_path)
+                img.width = 150
+                img.height = 150 * (img.height / img.width)  # Maintain aspect ratio
+                ws.add_image(img, 'E1')
+                ws.row_dimensions[1].height = 80
+                ws.row_dimensions[2].height = 20
+            except Exception:
+                pass
+        
         # Title
         ws.append(['COMMERCIAL OFFER'])
-        ws.merge_cells('A1:F1')
-        self.style_title_row(ws, 1)
+        ws.merge_cells('A3:F3')
+        self.style_title_row(ws, 3)
         
         ws.append([])  # Empty row
+        ws.append([])  # Extra row for spacing after title
         
         # Factors applied
         factors = costed_data['factors']
@@ -247,19 +304,78 @@ class DownloadManager:
         ws.append([f'Additional: {factors.get("additional", 0)}%'])
         ws.append([])  # Empty row
         
+        # Get session info for image paths
+        session_id = costed_data.get('session_id', '')
+        
         # Tables
         for table_idx, table in enumerate(costed_data['tables']):
             ws.append([f'Item List {table_idx + 1}'])
             ws.merge_cells(f'A{ws.max_row}:F{ws.max_row}')
             
-            # Headers
-            ws.append(table['headers'])
-            self.style_header_row(ws, ws.max_row)
+            # Filter out Action column from headers
+            headers = [h for h in table['headers'] if h.lower() not in ['action', 'actions']]
             
-            # Data rows
+            # Headers
+            header_row_num = ws.max_row + 1
+            ws.append(headers)
+            self.style_header_row(ws, header_row_num)
+            
+            # Find image column index
+            image_col_indices = []
+            for idx, h in enumerate(headers):
+                if 'image' in h.lower() or 'img' in h.lower() or 'ref' in h.lower():
+                    image_col_indices.append(idx)
+            
+            # Data rows - exclude Action column and embed images
             for row in table['rows']:
-                row_data = [row.get(h, '') for h in table['headers']]
+                current_row_num = ws.max_row + 1
+                row_data = []
+                
+                for col_idx, h in enumerate(headers):
+                    cell_value = row.get(h, '')
+                    
+                    # Check if this cell contains an image
+                    if self.contains_image(cell_value):
+                        row_data.append('')  # Empty cell, image will be placed on top
+                    else:
+                        # Strip HTML tags if any
+                        clean_value = re.sub(r'<[^>]+>', '', str(cell_value))
+                        row_data.append(clean_value)
+                
                 ws.append(row_data)
+                
+                # Set row height for images
+                if any(self.contains_image(row.get(h, '')) for h in headers):
+                    ws.row_dimensions[current_row_num].height = 75  # Height for images
+                
+                # Now embed images
+                for col_idx, h in enumerate(headers):
+                    cell_value = row.get(h, '')
+                    
+                    if self.contains_image(cell_value):
+                        image_path = self.extract_image_path(cell_value, session_id, file_id)
+                        if image_path and os.path.exists(image_path):
+                            try:
+                                # Add image to cell
+                                img = XLImage(image_path)
+                                # Resize image to fit cell (100x100 pixels)
+                                img.width = 100
+                                img.height = 100
+                                
+                                # Get cell coordinate (e.g., 'A5')
+                                cell_coord = ws.cell(row=current_row_num, column=col_idx + 1).coordinate
+                                
+                                # Add image to worksheet
+                                ws.add_image(img, cell_coord)
+                            except Exception as e:
+                                # If image fails, write placeholder text
+                                ws.cell(row=current_row_num, column=col_idx + 1).value = "[Image]"
+            
+            # Set column widths
+            for col_idx, h in enumerate(headers):
+                col_letter = chr(65 + col_idx)  # A, B, C, etc.
+                if col_idx in image_col_indices:
+                    ws.column_dimensions[col_letter].width = 15  # Wider for images
             
             ws.append([])  # Empty row
         
@@ -274,7 +390,7 @@ class DownloadManager:
         
         self.style_summary_rows(ws, ws.max_row - 2, ws.max_row)
         
-        # Auto-adjust columns
+        # Auto-adjust columns (except image columns)
         self.auto_adjust_columns(ws)
         
         wb.save(filename)
@@ -288,10 +404,23 @@ class DownloadManager:
         ws = wb.active
         ws.title = 'Alternatives'
         
+        # Add logo at top-right
+        logo_path = self.get_logo_path()
+        if logo_path and os.path.exists(logo_path):
+            try:
+                img = XLImage(logo_path)
+                img.width = 150
+                img.height = 150 * (img.height / img.width)
+                ws.add_image(img, 'G1')
+                ws.row_dimensions[1].height = 80
+                ws.row_dimensions[2].height = 20
+            except Exception:
+                pass
+        
         # Title
         ws.append([f'VALUE ENGINEERED ALTERNATIVES - {ve_data["budget_option"].upper()}'])
-        ws.merge_cells('A1:H1')
-        self.style_title_row(ws, 1)
+        ws.merge_cells('A3:H3')
+        self.style_title_row(ws, 3)
         ws.append([])
         
         # Process alternatives
@@ -329,6 +458,38 @@ class DownloadManager:
         
         wb.save(filename)
         return filename
+    
+    def contains_image(self, cell_value):
+        """Check if cell contains an image reference"""
+        return '<img' in str(cell_value).lower() or 'img_in_' in str(cell_value).lower()
+    
+    def extract_image_path(self, cell_value, session_id, file_id):
+        """Extract image path from cell value"""
+        try:
+            # Look for img src pattern
+            match = re.search(r'src=["\']([^"\']+)["\']', str(cell_value))
+            if match:
+                img_relative_path = match.group(1)
+                # Remove leading slash if present
+                img_relative_path = img_relative_path.lstrip('/')
+                # Build absolute path from workspace root
+                if img_relative_path.startswith('outputs'):
+                    img_path = img_relative_path
+                else:
+                    img_path = os.path.join('outputs', session_id, file_id, img_relative_path)
+                return img_path
+            
+            # Try to find image reference in text
+            if 'img_in_' in str(cell_value):
+                match = re.search(r'(imgs/img_in_[^"\s<>]+\.jpg)', str(cell_value))
+                if match:
+                    img_relative_path = match.group(1)
+                    img_path = os.path.join('outputs', session_id, file_id, img_relative_path)
+                    return img_path
+        except Exception as e:
+            pass
+        
+        return None
     
     def parse_markdown_tables(self, markdown_text):
         """Parse tables from markdown text"""
@@ -414,16 +575,26 @@ class DownloadManager:
     
     def auto_adjust_columns(self, ws):
         """Auto-adjust column widths based on content"""
+        from openpyxl.cell.cell import MergedCell
+        
         for column in ws.columns:
             max_length = 0
-            column_letter = column[0].column_letter
+            column_letter = None
             
             for cell in column:
                 try:
+                    # Skip merged cells
+                    if isinstance(cell, MergedCell):
+                        continue
+                    
+                    if column_letter is None:
+                        column_letter = cell.column_letter
+                    
                     if cell.value:
                         max_length = max(max_length, len(str(cell.value)))
                 except:
                     pass
             
-            adjusted_width = min(max_length + 2, 50)
-            ws.column_dimensions[column_letter].width = adjusted_width
+            if column_letter:
+                adjusted_width = min(max_length + 2, 50)
+                ws.column_dimensions[column_letter].width = adjusted_width
