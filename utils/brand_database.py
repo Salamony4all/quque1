@@ -540,3 +540,8 @@ class BrandDatabase:
         elif category.lower() == 'desking':
             return ['executive_desks', 'workstations', 'meeting_tables', 'pedestals', 'cabinets', 'lockers', 'partitions']
         return []
+
+
+# Create a global instance for easy access
+_db_instance = BrandDatabase()
+BRAND_DATABASE = _db_instance.brands

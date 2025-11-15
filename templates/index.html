@@ -4126,19 +4126,27 @@
                 return;
             }
             
-            // Show loading indicator
-            showAlert('Generating alternative offers...', 'info');
+            // Show progress modal
+            showProgressModal('Generating Alternative Offers');
+            updateProgress('Initializing...', 0);
             
             try {
                 // Load alternatives directly from existing table (fileId not needed - we read from DOM)
                 await loadValueEngineeringData(null);
                 
+                updateProgress('Building alternative table...', 90);
+                
                 // Create and display the alternative offers table
                 displayAlternativeOffersTable();
                 
-                showAlert('Alternative offers generated successfully!', 'success');
+                updateProgress('Complete!', 100);
+                setTimeout(() => {
+                    hideProgressModal();
+                    showAlert('Alternative offers generated successfully!', 'success');
+                }, 500);
             } catch (error) {
                 console.error('Value Engineering error:', error);
+                hideProgressModal();
                 showAlert('Error generating alternatives: ' + error.message, 'error');
             }
         }
@@ -4234,15 +4242,20 @@
             currentVEFileId = fileId;
             
             try {
+                updateProgress('Reading table data...', 10);
+                
                 // Get the existing stitched table data from DOM
                 const stitchedTable = document.querySelector('table[border="1"]') || 
                                       document.querySelector('table') || 
                                       document.querySelector('.editable-table');
                 
                 if (!stitchedTable) {
+                    hideProgressModal();
                     showAlert('No stitched table found. Please stitch tables first.', 'error');
                     return;
                 }
+                
+                updateProgress('Parsing items...', 20);
                 
                 // Parse the existing table to get items
                 veItems = parseStitchedTableToItems(stitchedTable);
@@ -4250,17 +4263,20 @@
                 console.log('Parsed veItems:', veItems);
                 
                 if (veItems.length === 0) {
+                    hideProgressModal();
                     showAlert('No items found in table', 'warning');
                     console.warn('No items extracted from table');
                     return;
                 }
                 
                 console.log(`Found ${veItems.length} items to process`);
+                updateProgress(`Processing ${veItems.length} items...`, 30);
                 
                 // Fetch alternatives for each item based on budget tier
                 await fetchAlternativesForItems(currentBudgetTier);
                 
                 console.log('Alternatives fetched successfully');
+                updateProgress('Finalizing data...', 80);
                 
             } catch (error) {
                 showAlert('Error loading alternatives: ' + error.message, 'error');
@@ -4326,6 +4342,8 @@
                     
                     <!-- Export Buttons -->
                     <div style=\"margin-bottom: 25px; display: flex; gap: 15px; flex-wrap: wrap;\">
+                        <button onclick=\"applySelectedAlternatives()\" class=\"action-btn\" style=\"background: #d4af37; color: #1a365d; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 6px rgba(0,0,0,0.1);\">\u2713 Apply Selected Items</button>
+                        <button onclick=\"openAddBrandModal()\" class=\"action-btn\" style=\"background: #8b5cf6; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 6px rgba(0,0,0,0.1);\">➕ Add Brand</button>
                         <button onclick=\"exportAlternativeTable('excel')\" class=\"action-btn\" style=\"background: #10b981; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;\">\ud83d\udcbe Export to Excel</button>
                         <button onclick=\"exportAlternativeTable('pdf')\" class=\"action-btn\" style=\"background: #ef4444; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;\">\ud83d\udcc4 Export to PDF</button>
                         <button onclick=\"downloadAlternativeTable()\" class=\"action-btn\" style=\"background: #3b82f6; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;\">\u2b07\ufe0f Download Edited Table</button>
@@ -4380,7 +4398,7 @@
             });
             
             // Alternative columns
-            const altHeaders = ['Alternative Selection', 'Alt. Image', 'Alt. Brand', 'Alt. Model', 'Alt. Unit Rate (OMR)', 'Alt. Total (OMR)', 'Difference', '% Savings'];
+            const altHeaders = ['Alternative Selection', 'Alt. Image', 'Alt. Description', 'Alt. Unit Rate (OMR)', 'Alt. Total (OMR)', 'Difference', '% Savings'];
             altHeaders.forEach(headerText => {
                 const th = document.createElement('th');
                 th.textContent = headerText;
@@ -4397,6 +4415,9 @@
             veItems.forEach((item, index) => {
                 const row = document.createElement('tr');
                 row.style.cssText = index % 2 === 0 ? 'background: #f9fafb;' : 'background: white;';
+                
+                // Set the item's display index for consistent reference
+                item.displayIndex = index;
                 
                 // Original data columns
                 const siNoCell = document.createElement('td');
@@ -4615,13 +4636,14 @@
                         } else {
                             const brandData = allBrandsData[item.category][item.selectedBrand];
                             
-                            // Update row with alternative data
+                            // Update row with alternative data including features
                             updateAlternativeDataInRow(row, {
                                 brand: item.selectedBrand,
                                 model: modelData.model,
                                 unit_rate: avgPrice,
                                 total: altTotal,
-                                country: brandData.country
+                                country: brandData.country,
+                                features: modelData.features || []
                             }, item);
                         }
                     }
@@ -4642,13 +4664,21 @@
                 altImgCell.textContent = '-';
                 row.appendChild(altImgCell);
                 
-                // Alternative detail columns
-                ['brand', 'model', 'rate', 'total', 'diff', 'savings'].forEach(type => {
+                // Alternative description cell (merged brand + model + details)
+                const altDescCell = document.createElement('td');
+                altDescCell.contentEditable = 'true';
+                altDescCell.className = `ve-alt-description-${index}`;
+                altDescCell.textContent = '-';
+                altDescCell.style.cssText = 'padding: 10px; border: 1px solid #ddd; min-width: 250px;';
+                row.appendChild(altDescCell);
+                
+                // Alternative detail columns (rate, total, diff, savings)
+                ['rate', 'total', 'diff', 'savings'].forEach(type => {
                     const cell = document.createElement('td');
-                    cell.contentEditable = (type === 'brand' || type === 'model' || type === 'rate' || type === 'total') ? 'true' : 'false';
+                    cell.contentEditable = (type === 'rate' || type === 'total') ? 'true' : 'false';
                     cell.className = `ve-alt-${type}-${index}`;
                     cell.textContent = '-';
-                    cell.style.cssText = 'padding: 10px; border: 1px solid #ddd; text-align: ' + (type === 'rate' || type === 'total' || type === 'diff' || type === 'savings' ? 'right' : 'left') + ';';
+                    cell.style.cssText = 'padding: 10px; border: 1px solid #ddd; text-align: right;';
                     if (type === 'diff' || type === 'savings') {
                         cell.style.fontWeight = 'bold';
                     }
@@ -4671,21 +4701,70 @@
         
         // Update alternative data in row when model is selected
         function updateAlternativeDataInRow(row, altData, item) {
-            const itemIndex = item.rowIndex;
+            const itemIndex = item.displayIndex !== undefined ? item.displayIndex : item.rowIndex;
+            
+            console.log('updateAlternativeDataInRow called:', {
+                itemIndex,
+                displayIndex: item.displayIndex,
+                rowIndex: item.rowIndex,
+                altData,
+                itemQty: item.qty,
+                itemTotal: item.total
+            });
             
             // Update cells with alternative data
             const imgCell = row.querySelector(`.ve-alt-image-${itemIndex}`);
-            const brandCell = row.querySelector(`.ve-alt-brand-${itemIndex}`);
-            const modelCell = row.querySelector(`.ve-alt-model-${itemIndex}`);
+            const descCell = row.querySelector(`.ve-alt-description-${itemIndex}`);
             const rateCell = row.querySelector(`.ve-alt-rate-${itemIndex}`);
             const totalCell = row.querySelector(`.ve-alt-total-${itemIndex}`);
             const diffCell = row.querySelector(`.ve-alt-diff-${itemIndex}`);
             const savingsCell = row.querySelector(`.ve-alt-savings-${itemIndex}`);
             
-            if (brandCell) brandCell.textContent = altData.brand;
-            if (modelCell) modelCell.textContent = altData.model;
+            console.log('Cells found:', {
+                imgCell: !!imgCell,
+                descCell: !!descCell,
+                rateCell: !!rateCell,
+                totalCell: !!totalCell
+            });
+            
+            // Create rich description with brand, model, and features
+            if (descCell) {
+                const brandName = altData.brand;
+                const modelName = altData.model;
+                const country = altData.country || '';
+                const features = altData.features || [];
+                
+                // Build detailed description HTML
+                let descHTML = `<div style="line-height: 1.6;">`;
+                descHTML += `<strong style="color: #1a365d; font-size: 1.1em;">${brandName} ${modelName}</strong><br/>`;
+                
+                if (country) {
+                    descHTML += `<span style="color: #666; font-size: 0.9em;">Origin: ${country}</span><br/>`;
+                }
+                
+                if (features && features.length > 0) {
+                    descHTML += `<div style="margin-top: 5px; color: #555; font-size: 0.85em;">`;
+                    descHTML += features.slice(0, 3).join(' • ');
+                    descHTML += `</div>`;
+                }
+                
+                descHTML += `</div>`;
+                descCell.innerHTML = descHTML;
+                
+                // Store brand and model as data attributes for later reference
+                descCell.dataset.brand = brandName;
+                descCell.dataset.model = modelName;
+            }
+            
             if (rateCell) rateCell.textContent = altData.unit_rate.toFixed(2);
             if (totalCell) totalCell.textContent = altData.total.toFixed(2);
+            
+            console.log('Cells updated with data:', {
+                brand: altData.brand,
+                model: altData.model,
+                rate: altData.unit_rate.toFixed(2),
+                total: altData.total.toFixed(2)
+            });
             
             // Fetch and display product image
             if (imgCell && altData.brand !== 'Local') {
@@ -4759,11 +4838,17 @@
         
         // Clear alternative data in row
         function clearAlternativeDataInRow(row) {
-            ['image', 'brand', 'model', 'rate', 'total', 'diff', 'savings'].forEach(type => {
+            ['image', 'description', 'rate', 'total', 'diff', 'savings'].forEach(type => {
                 const cells = row.querySelectorAll(`[class*="ve-alt-${type}-"]`);
                 cells.forEach(cell => {
-                    cell.textContent = '-';
-                    cell.innerHTML = '-';
+                    if (type === 'description') {
+                        cell.innerHTML = '-';
+                        delete cell.dataset.brand;
+                        delete cell.dataset.model;
+                    } else {
+                        cell.textContent = '-';
+                        cell.innerHTML = '-';
+                    }
                     if (type === 'diff' || type === 'savings') {
                         cell.style.color = '';
                     }
@@ -4833,6 +4918,163 @@
             a.download = 'alternative-offers-' + new Date().toISOString().slice(0, 10) + '.html';
             a.click();
             URL.revokeObjectURL(url);
+        }
+        
+        // Apply selected alternatives to the original table cells
+        function applySelectedAlternatives() {
+            let appliedCount = 0;
+            let skippedCount = 0;
+            
+            console.log('applySelectedAlternatives called');
+            
+            // Get the original stitched table
+            const originalTable = document.querySelector('table[border="1"]') || 
+                                 document.querySelector('table');
+            
+            if (!originalTable) {
+                showAlert('Original table not found', 'error');
+                return;
+            }
+            
+            // Get all rows from alternative table
+            const altTable = document.querySelector('#altTableContainer table');
+            if (!altTable) {
+                showAlert('Alternative table not found', 'error');
+                return;
+            }
+            
+            const altRows = altTable.querySelectorAll('tbody tr');
+            const originalRows = originalTable.querySelectorAll('tbody tr');
+            
+            console.log(`Processing ${altRows.length} alternative rows, ${originalRows.length} original rows`);
+            
+            // Process each row
+            altRows.forEach((altRow, index) => {
+                // Check if an alternative is selected for this row
+                const altDescCell = altRow.querySelector(`.ve-alt-description-${index}`);
+                const altRateCell = altRow.querySelector(`.ve-alt-rate-${index}`);
+                const altImageCell = altRow.querySelector(`.ve-alt-image-${index}`);
+                
+                console.log(`Row ${index}:`, {
+                    descCell: altDescCell,
+                    descContent: altDescCell?.textContent,
+                    descHTML: altDescCell?.innerHTML,
+                    brand: altDescCell?.dataset?.brand,
+                    model: altDescCell?.dataset?.model,
+                    rateCell: altRateCell,
+                    rate: altRateCell?.textContent
+                });
+                
+                // Check if alternative data exists (not just '-')
+                if (!altDescCell || 
+                    altDescCell.textContent.trim() === '-' || 
+                    altDescCell.textContent.trim() === '' ||
+                    !altDescCell.dataset.brand) {
+                    console.log(`Row ${index}: Skipping - no alternative selected`);
+                    skippedCount++;
+                    return; // Skip this row - no alternative selected
+                }
+                
+                const brand = altDescCell.dataset.brand;
+                const model = altDescCell.dataset.model;
+                
+                console.log(`Row ${index}: Has alternative - Brand: ${brand}, Model: ${model}`);
+                
+                // Find corresponding row in original table (accounting for potential header row)
+                const originalRowIndex = index < originalRows.length ? index : index - 1;
+                const originalRow = originalRows[originalRowIndex];
+                
+                if (!originalRow) {
+                    console.log(`Row ${index}: Original row not found at index ${originalRowIndex}`);
+                    skippedCount++;
+                    return;
+                }
+                
+                // Get the cells from original row
+                const originalCells = originalRow.querySelectorAll('td');
+                
+                // Find the description, rate, and total columns (typically columns 1, 4, 5)
+                // Assuming structure: SI.No | Image | Description | Qty | Unit | Rate | Total
+                if (originalCells.length >= 6) {
+                    // Update image (column 1)
+                    const imgCell = originalCells[1];
+                    const altImage = altImageCell.querySelector('img');
+                    if (altImage) {
+                        imgCell.innerHTML = '';
+                        const newImg = document.createElement('img');
+                        newImg.src = altImage.src;
+                        newImg.style.cssText = 'max-width: 80px; max-height: 80px; object-fit: contain;';
+                        newImg.alt = altModelCell.textContent;
+                        imgCell.appendChild(newImg);
+                    }
+                    
+                    // Update description with brand and model (column 2)
+                    const descCell = originalCells[2];
+                    const originalDesc = descCell.textContent;
+                    descCell.innerHTML = `<strong style="color: #d4af37;">${brand} - ${model}</strong><br/><span style="font-size: 0.9em; color: #666;">${originalDesc}</span>`;
+                    
+                    // Update rate (column 5)
+                    const rateCell = originalCells[5];
+                    rateCell.textContent = altRateCell.textContent;
+                    rateCell.style.background = '#e8f5e9';
+                    rateCell.style.fontWeight = 'bold';
+                    
+                    // Update total (column 6) - multiply rate by qty
+                    const qtyCell = originalCells[3];
+                    const qty = parseFloat(qtyCell.textContent) || 1;
+                    const rate = parseFloat(altRateCell.textContent) || 0;
+                    const totalCell = originalCells[6];
+                    totalCell.textContent = (qty * rate).toFixed(2);
+                    totalCell.style.background = '#e8f5e9';
+                    totalCell.style.fontWeight = 'bold';
+                    
+                    appliedCount++;
+                }
+            });
+            
+            // Update the total at bottom of original table if it exists
+            updateOriginalTableTotal(originalTable);
+            
+            // Show summary
+            if (appliedCount > 0) {
+                showAlert(`Applied ${appliedCount} alternative${appliedCount > 1 ? 's' : ''} to original table! ${skippedCount > 0 ? `(${skippedCount} skipped - no alternative selected)` : ''}`, 'success');
+            } else {
+                showAlert('No alternatives were selected to apply. Please select alternatives from the dropdowns first.', 'warning');
+            }
+        }
+        
+        // Update total row in original table
+        function updateOriginalTableTotal(table) {
+            const rows = table.querySelectorAll('tbody tr');
+            let grandTotal = 0;
+            
+            rows.forEach((row, index) => {
+                const cells = row.querySelectorAll('td');
+                // Check if this is a data row (has enough cells and a total column)
+                if (cells.length >= 7) {
+                    const totalCell = cells[6];
+                    const total = parseFloat(totalCell.textContent) || 0;
+                    grandTotal += total;
+                }
+            });
+            
+            // Look for a total row and update it
+            const lastRow = rows[rows.length - 1];
+            if (lastRow) {
+                const cells = lastRow.querySelectorAll('td');
+                // Check if last row is a total row (contains "total" text)
+                const firstCellText = cells[0]?.textContent.toLowerCase() || '';
+                if (firstCellText.includes('total')) {
+                    // Update the last cell with new grand total
+                    const lastCell = cells[cells.length - 1];
+                    if (lastCell) {
+                        lastCell.textContent = grandTotal.toFixed(2);
+                        lastCell.style.background = '#fef3c7';
+                        lastCell.style.fontWeight = 'bold';
+                        lastCell.style.fontSize = '1.1em';
+                    }
+                }
+            }
         }
         
         // Parse stitched table from DOM to extract items
@@ -5019,7 +5261,14 @@
                 const categories = ['seating', 'desking'];
                 allBrandsData = {};
                 
+                let totalSteps = categories.length;
+                let completedSteps = 0;
+                const baseProgress = 30; // Starting from 30%
+                const progressRange = 50; // Will go from 30% to 80%
+                
                 for (const category of categories) {
+                    updateProgress(`Loading ${category} brands...`, baseProgress + (completedSteps / totalSteps) * progressRange);
+                    
                     const response = await fetch(`/api/brands/list?tier=${budgetTier}&category=${category}`);
                     const data = await response.json();
                     
@@ -5027,6 +5276,9 @@
                         if (!allBrandsData[category]) {
                             allBrandsData[category] = {};
                         }
+                        
+                        const totalBrands = data.brands.length;
+                        let processedBrands = 0;
                         
                         // Fetch models for each brand
                         for (const brand of data.brands) {
@@ -5050,13 +5302,22 @@
                                     }
                                 }
                             }
+                            
+                            processedBrands++;
+                            const categoryProgress = (processedBrands / totalBrands) * (progressRange / totalSteps);
+                            updateProgress(`Loading ${category} brands (${processedBrands}/${totalBrands})...`, 
+                                         baseProgress + (completedSteps / totalSteps) * progressRange + categoryProgress);
                         }
                     }
+                    
+                    completedSteps++;
                 }
                 
                 console.log('All brands data loaded:', allBrandsData);
             } catch (error) {
                 console.error('Error fetching brands data:', error);
+                hideProgressModal();
+                throw error;
             }
         }
         
@@ -5556,6 +5817,265 @@
                 }
             });
         });
+    </script>
+    
+    <!-- Progress Modal for Alternative Generation -->
+    <div id="progressModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; justify-content: center; align-items: center;">
+        <div style="background: linear-gradient(135deg, #1a365d 0%, #2d5a8f 100%); padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); max-width: 500px; width: 90%; border: 2px solid #d4af37;">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <div style="font-size: 3em; margin-bottom: 15px;">💡</div>
+                <h2 id="progressTitle" style="color: #d4af37; margin: 0; font-size: 1.5em;">Generating Alternatives</h2>
+            </div>
+            
+            <div style="margin-bottom: 25px;">
+                <div style="background: rgba(255,255,255,0.1); border-radius: 10px; height: 30px; overflow: hidden; border: 1px solid #d4af37;">
+                    <div id="progressBar" style="background: linear-gradient(90deg, #d4af37 0%, #f4d47d 100%); height: 100%; width: 0%; transition: width 0.3s ease; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px;">
+                        <span id="progressPercent" style="color: #1a365d; font-weight: bold; font-size: 0.9em;"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="text-align: center;">
+                <div id="progressMessage" style="color: #ffffff; font-size: 1em; margin-bottom: 15px; min-height: 24px;">Initializing...</div>
+                <div class="spinner" style="margin: 20px auto; width: 50px; height: 50px; border: 4px solid rgba(212, 175, 55, 0.3); border-top: 4px solid #d4af37; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Brand Modal -->
+    <div id="addBrandModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; justify-content: center; align-items: center;">
+        <div style="background: linear-gradient(135deg, #1a365d 0%, #2d5a8e 100%); padding: 40px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; border: 3px solid #d4af37;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <h2 style="color: #d4af37; margin: 0; font-size: 2em;">➕ Add New Brand</h2>
+                <button onclick="closeAddBrandModal()" style="background: transparent; border: none; color: #d4af37; font-size: 2em; cursor: pointer; line-height: 1; padding: 0; width: 40px; height: 40px;">&times;</button>
+            </div>
+            
+            <div style="margin-bottom: 30px;">
+                <p style="color: white; font-size: 1.1em; margin-bottom: 20px;">Enter a brand's website URL and we'll automatically scrape and add their products to the database.</p>
+                
+                <form id="addBrandForm" onsubmit="handleAddBrand(event)">
+                    <!-- Brand Name -->
+                    <div style="margin-bottom: 20px;">
+                        <label style="color: #d4af37; font-weight: bold; display: block; margin-bottom: 8px;">Brand Name *</label>
+                        <input type="text" id="brandName" required placeholder="e.g., Herman Miller" style="width: 100%; padding: 12px; border: 2px solid #d4af37; border-radius: 8px; font-size: 1em; background: rgba(255,255,255,0.95);">
+                    </div>
+                    
+                    <!-- Website URL -->
+                    <div style="margin-bottom: 20px;">
+                        <label style="color: #d4af37; font-weight: bold; display: block; margin-bottom: 8px;">Website URL *</label>
+                        <input type="url" id="brandWebsite" required placeholder="https://www.example.com" style="width: 100%; padding: 12px; border: 2px solid #d4af37; border-radius: 8px; font-size: 1em; background: rgba(255,255,255,0.95);">
+                        <small style="color: #ddd; display: block; margin-top: 5px;">Enter the main website URL</small>
+                    </div>
+                    
+                    <!-- Country -->
+                    <div style="margin-bottom: 20px;">
+                        <label style="color: #d4af37; font-weight: bold; display: block; margin-bottom: 8px;">Country</label>
+                        <input type="text" id="brandCountry" placeholder="e.g., USA" style="width: 100%; padding: 12px; border: 2px solid #d4af37; border-radius: 8px; font-size: 1em; background: rgba(255,255,255,0.95);">
+                    </div>
+                    
+                    <!-- Budget Tier -->
+                    <div style="margin-bottom: 20px;">
+                        <label style="color: #d4af37; font-weight: bold; display: block; margin-bottom: 8px;">Budget Tier *</label>
+                        <select id="brandTier" required style="width: 100%; padding: 12px; border: 2px solid #d4af37; border-radius: 8px; font-size: 1em; background: rgba(255,255,255,0.95);">
+                            <option value="budgetary">💰 Budgetary</option>
+                            <option value="mid_range" selected>⭐ Mid-Range</option>
+                            <option value="high_end">👑 High-End</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Scrape Status -->
+                    <div id="scrapeStatus" style="margin-bottom: 20px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 8px; display: none;">
+                        <div id="scrapeMessage" style="color: white; margin-bottom: 10px;"></div>
+                        <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.2); border-radius: 4px; overflow: hidden;">
+                            <div id="scrapeProgress" style="width: 0%; height: 100%; background: #d4af37; transition: width 0.3s;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Preview Area -->
+                    <div id="brandPreview" style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 8px; display: none;">
+                        <h4 style="color: #d4af37; margin-bottom: 10px;">Preview:</h4>
+                        <div id="previewContent" style="color: white; font-size: 0.9em;"></div>
+                    </div>
+                    
+                    <!-- Buttons -->
+                    <div style="margin-top: 30px; display: flex; gap: 15px; justify-content: flex-end;">
+                        <button type="button" onclick="closeAddBrandModal()" style="padding: 12px 30px; border: 2px solid #d4af37; border-radius: 8px; background: transparent; color: #d4af37; font-weight: 600; cursor: pointer; font-size: 1em;">Cancel</button>
+                        <button type="submit" id="addBrandSubmit" style="padding: 12px 30px; border: none; border-radius: 8px; background: #d4af37; color: #1a365d; font-weight: 600; cursor: pointer; font-size: 1em; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">🔍 Scrape & Add Brand</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+    
+    <script>
+        // Progress modal functions
+        function showProgressModal(title = 'Processing') {
+            const modal = document.getElementById('progressModal');
+            const titleElem = document.getElementById('progressTitle');
+            if (modal && titleElem) {
+                titleElem.textContent = title;
+                modal.style.display = 'flex';
+            }
+        }
+        
+        function hideProgressModal() {
+            const modal = document.getElementById('progressModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+        
+        function updateProgress(message, percent) {
+            const progressBar = document.getElementById('progressBar');
+            const progressPercent = document.getElementById('progressPercent');
+            const progressMessage = document.getElementById('progressMessage');
+            
+            if (progressBar) {
+                progressBar.style.width = percent + '%';
+            }
+            if (progressPercent && percent > 15) {
+                progressPercent.textContent = Math.round(percent) + '%';
+            } else if (progressPercent) {
+                progressPercent.textContent = '';
+            }
+            if (progressMessage) {
+                progressMessage.textContent = message;
+            }
+            
+            console.log(`Progress: ${percent}% - ${message}`);
+        }
+        
+        // Add Brand Modal Functions
+        function openAddBrandModal() {
+            const modal = document.getElementById('addBrandModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                // Reset form
+                document.getElementById('addBrandForm').reset();
+                document.getElementById('scrapeStatus').style.display = 'none';
+                document.getElementById('brandPreview').style.display = 'none';
+            }
+        }
+        
+        function closeAddBrandModal() {
+            const modal = document.getElementById('addBrandModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+        
+        async function handleAddBrand(event) {
+            event.preventDefault();
+            
+            const brandName = document.getElementById('brandName').value.trim();
+            const website = document.getElementById('brandWebsite').value.trim();
+            const country = document.getElementById('brandCountry').value.trim() || 'Unknown';
+            const tier = document.getElementById('brandTier').value;
+            
+            if (!brandName || !website) {
+                showAlert('Please enter brand name and website', 'error');
+                return;
+            }
+            
+            // Validate URL
+            try {
+                new URL(website);
+            } catch (e) {
+                showAlert('Please enter a valid website URL', 'error');
+                return;
+            }
+            
+            const statusDiv = document.getElementById('scrapeStatus');
+            const messageDiv = document.getElementById('scrapeMessage');
+            const progressBar = document.getElementById('scrapeProgress');
+            const submitBtn = document.getElementById('addBrandSubmit');
+            const previewDiv = document.getElementById('brandPreview');
+            const previewContent = document.getElementById('previewContent');
+            
+            // Show status
+            statusDiv.style.display = 'block';
+            previewDiv.style.display = 'none';
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Scraping...';
+            
+            try {
+                // Step 1: Start scraping
+                messageDiv.textContent = '🔍 Analyzing website structure...';
+                progressBar.style.width = '10%';
+                
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                messageDiv.textContent = '📡 Fetching product data...';
+                progressBar.style.width = '30%';
+                
+                // Make API call
+                const response = await fetch('/api/brands/scrape-and-add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        brand_name: brandName,
+                        website: website,
+                        country: country,
+                        tier: tier
+                    })
+                });
+                
+                progressBar.style.width = '70%';
+                messageDiv.textContent = '💾 Processing results...';
+                
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    progressBar.style.width = '100%';
+                    messageDiv.textContent = '✅ Brand added successfully!';
+                    messageDiv.style.color = '#10b981';
+                    
+                    // Show preview
+                    previewDiv.style.display = 'block';
+                    previewContent.innerHTML = `
+                        <div style="line-height: 1.8;">
+                            <strong style="color: #d4af37;">${brandName}</strong><br/>
+                            <span>Country: ${country}</span><br/>
+                            <span>Tier: ${tier.replace('_', ' ').toUpperCase()}</span><br/>
+                            <span>Products Found: ${result.products_count || 0}</span><br/>
+                            <span>Categories: ${result.categories ? result.categories.join(', ') : 'N/A'}</span>
+                        </div>
+                    `;
+                    
+                    showAlert(`Successfully added ${brandName} with ${result.products_count || 0} products!`, 'success');
+                    
+                    // Close modal after delay
+                    setTimeout(() => {
+                        closeAddBrandModal();
+                        // Reload brands if on value engineering page
+                        if (typeof loadBrandsForTier === 'function') {
+                            loadBrandsForTier(currentBudgetTier);
+                        }
+                    }, 3000);
+                    
+                } else {
+                    throw new Error(result.error || 'Failed to add brand');
+                }
+                
+            } catch (error) {
+                console.error('Error adding brand:', error);
+                progressBar.style.width = '0%';
+                messageDiv.textContent = '❌ Error: ' + error.message;
+                messageDiv.style.color = '#ef4444';
+                showAlert('Error: ' + error.message, 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = '🔍 Scrape & Add Brand';
+            }
+        }
     </script>
 </body>
 </html>

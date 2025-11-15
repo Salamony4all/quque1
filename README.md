@@ -47,6 +47,8 @@ Navigate to: **http://localhost:5000**
 - **Presentation Generation**: Create eye-catching technical proposals (1 page per item)
 - **MAS Generation**: Material Approval Sheets with company template
 - **Value Engineering**: AI-powered product alternatives based on budget options
+- **🆕 Brand Scraping**: Automatically scrape furniture brand websites to add new brands
+- **🆕 Add Brand Button**: User-friendly interface to expand brand database
 - **Multi-format Export**: Download results in PDF, XLS, XLSX with embedded images  
 
 ## Build Instructions
@@ -156,9 +158,31 @@ Navigate to: **http://localhost:5000**
   - **Medium Range** (100% - original price)
   - **High End** (150% of original price)
 - AI-powered brand suggestions
+- **➕ Add Brand**: Scrape brand websites to automatically add new furniture brands
 - Comparison table with specs and pricing
 
-### Step 6: Download
+### Step 6: Add New Brands (Optional)
+
+The **Add Brand** feature allows you to expand the furniture brand database:
+
+1. Click **Generate Alternative Offers** to open Value Engineering
+2. Click **➕ Add Brand** button (purple button)
+3. Fill in the brand information:
+   - Brand name (e.g., "Herman Miller")
+   - Website URL (e.g., "https://www.hermanmiller.com")
+   - Country (optional)
+   - Budget tier (Budgetary/Mid-Range/High-End)
+4. Click **🔍 Scrape & Add Brand**
+5. Watch the progress as the system:
+   - Analyzes website structure
+   - Fetches product data
+   - Processes results
+6. Review discovered products and categories
+7. Brand is now available in dropdowns!
+
+For detailed instructions, see: [**BRAND_SCRAPING_GUIDE.md**](BRAND_SCRAPING_GUIDE.md)
+
+### Step 7: Download
 
 All generated documents can be downloaded in multiple formats:
 - **PDF** - For presentations, offers, and MAS

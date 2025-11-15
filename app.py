@@ -867,6 +867,235 @@ def get_subcategories_api():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/brands/scrape', methods=['POST'])
+def scrape_brand():
+    """Scrape a brand's website to discover products"""
+    try:
+        data = request.get_json()
+        brand_name = data.get('brand_name')
+        website = data.get('website')
+        
+        if not brand_name or not website:
+            return jsonify({'error': 'Brand name and website are required'}), 400
+        
+        from utils.brand_scraper import BrandScraper
+        scraper = BrandScraper()
+        
+        logger.info(f"Starting scrape for {brand_name} ({website})")
+        scraped_data = scraper.scrape_brand_website(website, brand_name)
+        
+        if 'error' in scraped_data:
+            return jsonify({'error': scraped_data['error']}), 400
+        
+        return jsonify({
+            'success': True,
+            'data': scraped_data,
+            'message': f'Successfully scraped {len(scraped_data.get("products", []))} products'
+        })
+    except Exception as e:
+        logger.exception('Error in brand scraping')
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/brands/add', methods=['POST'])
+def add_brand():
+    """Add a new brand to the database"""
+    try:
+        data = request.get_json()
+        brand_name = data.get('brand_name')
+        website = data.get('website')
+        country = data.get('country', 'Unknown')
+        tier = data.get('tier', 'mid_range')
+        categories = data.get('categories', {})
+        
+        if not brand_name or not website:
+            return jsonify({'error': 'Brand name and website are required'}), 400
+        
+        # Load existing brands
+        from utils.brand_database import BRAND_DATABASE
+        import json
+        
+        # Check if brand already exists
+        for t in BRAND_DATABASE:
+            for cat in BRAND_DATABASE[t]:
+                for brand in BRAND_DATABASE[t][cat]:
+                    if brand['name'].lower() == brand_name.lower():
+                        return jsonify({'error': 'Brand already exists'}), 400
+        
+        # Create new brand entry
+        new_brand = {
+            'name': brand_name,
+            'website': website,
+            'country': country,
+            'models': categories
+        }
+        
+        # Add to database (in memory for now)
+        if tier not in BRAND_DATABASE:
+            return jsonify({'error': f'Invalid tier: {tier}'}), 400
+        
+        # Add to first available category or create new one
+        if categories:
+            for category in categories:
+                if category not in BRAND_DATABASE[tier]:
+                    BRAND_DATABASE[tier][category] = []
+                
+                # Check if brand already in this category
+                brand_exists = False
+                for brand in BRAND_DATABASE[tier][category]:
+                    if brand['name'].lower() == brand_name.lower():
+                        brand_exists = True
+                        break
+                
+                if not brand_exists:
+                    BRAND_DATABASE[tier][category].append(new_brand)
+        else:
+            # Default to general category
+            if 'general' not in BRAND_DATABASE[tier]:
+                BRAND_DATABASE[tier]['general'] = []
+            BRAND_DATABASE[tier]['general'].append(new_brand)
+        
+        # Save to file
+        save_brand_database(BRAND_DATABASE)
+        
+        return jsonify({
+            'success': True,
+            'message': f'Brand {brand_name} added successfully',
+            'brand': new_brand
+        })
+    except Exception as e:
+        logger.exception('Error adding brand')
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/brands/scrape-and-add', methods=['POST'])
+def scrape_and_add_brand():
+    """Scrape a brand's website and add it to the database"""
+    try:
+        data = request.get_json()
+        brand_name = data.get('brand_name')
+        website = data.get('website')
+        country = data.get('country', 'Unknown')
+        tier = data.get('tier', 'mid_range')
+        
+        if not brand_name or not website:
+            return jsonify({'error': 'Brand name and website are required'}), 400
+        
+        # First scrape the website
+        from utils.brand_scraper import BrandScraper
+        scraper = BrandScraper()
+        
+        logger.info(f"Scraping {brand_name} ({website})")
+        scraped_data = scraper.scrape_brand_website(website, brand_name)
+        
+        if 'error' in scraped_data:
+            return jsonify({'error': scraped_data['error']}), 400
+        
+        # Convert scraped data to database format
+        categories_data = {}
+        
+        # Process category-based products
+        for category_name, products in scraped_data.get('categories', {}).items():
+            # Determine subcategory (simplified)
+            subcategory = 'general'
+            if 'chair' in category_name.lower() or 'seating' in category_name.lower():
+                subcategory = 'chairs'
+            elif 'desk' in category_name.lower() or 'table' in category_name.lower():
+                subcategory = 'desks'
+            
+            if subcategory not in categories_data:
+                categories_data[subcategory] = []
+            
+            # Add products
+            for product in products:
+                model_entry = {
+                    'model': product.get('model', 'Unknown Model'),
+                    'price_range': f"{int(product.get('price', 0))}-{int(product.get('price', 0) * 1.5)}" if product.get('price') else "Contact for price",
+                    'features': product.get('features', [])[:5],  # Max 5 features
+                    'image_url': product.get('image_url'),
+                    'description': product.get('description', ''),
+                    'source_url': product.get('source_url')
+                }
+                categories_data[subcategory].append(model_entry)
+        
+        # Process standalone products
+        for product in scraped_data.get('products', []):
+            subcategory = 'general'
+            if subcategory not in categories_data:
+                categories_data[subcategory] = []
+            
+            model_entry = {
+                'model': product.get('model', 'Unknown Model'),
+                'price_range': f"{int(product.get('price', 0))}-{int(product.get('price', 0) * 1.5)}" if product.get('price') else "Contact for price",
+                'features': product.get('features', [])[:5],
+                'image_url': product.get('image_url'),
+                'description': product.get('description', ''),
+                'source_url': product.get('source_url')
+            }
+            categories_data[subcategory].append(model_entry)
+        
+        # Now add to database
+        from utils.brand_database import BRAND_DATABASE
+        
+        # Create brand entry
+        new_brand = {
+            'name': brand_name,
+            'website': website,
+            'country': country,
+            'models': categories_data
+        }
+        
+        # Determine main category
+        main_category = 'general'
+        if any('chair' in cat.lower() or 'seating' in cat.lower() for cat in categories_data):
+            main_category = 'seating'
+        elif any('desk' in cat.lower() or 'table' in cat.lower() for cat in categories_data):
+            main_category = 'desking'
+        
+        # Add to database
+        if tier not in BRAND_DATABASE:
+            return jsonify({'error': f'Invalid tier: {tier}'}), 400
+        
+        if main_category not in BRAND_DATABASE[tier]:
+            BRAND_DATABASE[tier][main_category] = []
+        
+        # Check if brand already exists
+        brand_exists = False
+        for brand in BRAND_DATABASE[tier][main_category]:
+            if brand['name'].lower() == brand_name.lower():
+                # Update existing brand
+                brand['models'] = categories_data
+                brand['website'] = website
+                brand['country'] = country
+                brand_exists = True
+                break
+        
+        if not brand_exists:
+            BRAND_DATABASE[tier][main_category].append(new_brand)
+        
+        # Save to file
+        save_brand_database(BRAND_DATABASE)
+        
+        return jsonify({
+            'success': True,
+            'message': f'Successfully scraped and added {brand_name} with {sum(len(v) for v in categories_data.values())} products',
+            'brand': new_brand,
+            'products_count': sum(len(v) for v in categories_data.values()),
+            'categories': list(categories_data.keys())
+        })
+    except Exception as e:
+        logger.exception('Error in scrape and add')
+        return jsonify({'error': str(e)}), 500
+
+def save_brand_database(database):
+    """Save brand database to file"""
+    try:
+        import json
+        db_file = os.path.join('utils', 'brand_database_custom.json')
+        with open(db_file, 'w') as f:
+            json.dump(database, f, indent=2)
+        logger.info(f"Brand database saved to {db_file}")
+    except Exception as e:
+        logger.error(f"Error saving brand database: {e}")
+
 @app.route('/download/<file_type>/<file_id>', methods=['GET'])
 def download(file_type, file_id):
     """Download generated files"""
