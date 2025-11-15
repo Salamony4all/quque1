@@ -1909,6 +1909,443 @@
             color: #ef4444;
         }
         
+        /* Value Engineering Modal Styles */
+        .ve-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 10000;
+            overflow-y: auto;
+            backdrop-filter: blur(8px);
+        }
+        
+        .ve-modal-content {
+            background: linear-gradient(135deg, #1a365d 0%, #2d4a7c 100%);
+            border-radius: 20px;
+            max-width: 1400px;
+            margin: 40px auto;
+            box-shadow: 0 25px 100px rgba(0, 0, 0, 0.5);
+            animation: modalSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1);
+        }
+        
+        .ve-modal-header {
+            padding: 30px;
+            border-bottom: 2px solid rgba(212, 175, 55, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .ve-modal-header h2 {
+            color: #ffffff;
+            font-size: 1.8em;
+            margin: 0;
+        }
+        
+        .ve-modal-close {
+            font-size: 2.5em;
+            color: #d4af37;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: none;
+            border: none;
+        }
+        
+        .ve-modal-close:hover {
+            transform: rotate(90deg) scale(1.2);
+            color: #ef4444;
+        }
+        
+        .ve-modal-body {
+            padding: 30px;
+        }
+        
+        .ve-modal-footer {
+            padding: 20px 30px;
+            border-top: 2px solid rgba(212, 175, 55, 0.3);
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+        
+        /* Budget Tier Tabs */
+        .ve-tier-tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .ve-tier-tab {
+            flex: 1;
+            min-width: 200px;
+            padding: 18px 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .ve-tier-tab:hover {
+            background: rgba(212, 175, 55, 0.2);
+            border-color: #d4af37;
+            transform: translateY(-2px);
+        }
+        
+        .ve-tier-tab.active {
+            background: #d4af37;
+            border-color: #d4af37;
+            color: #1a365d;
+            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.4);
+        }
+        
+        /* Summary Card */
+        .ve-summary-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .ve-summary-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .ve-summary-label {
+            font-size: 0.9em;
+            color: #64748b;
+            font-weight: 500;
+        }
+        
+        .ve-summary-value {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: #1a365d;
+        }
+        
+        .ve-new-total {
+            color: #d4af37;
+        }
+        
+        .ve-savings {
+            color: #10b981 !important;
+        }
+        
+        .ve-increase {
+            color: #ef4444 !important;
+        }
+        
+        /* Items List */
+        .ve-items-list {
+            overflow-x: auto;
+        }
+        
+        .ve-table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .ve-comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+        
+        .ve-comparison-table thead {
+            background: linear-gradient(135deg, #1a365d 0%, #2d4a7c 100%);
+            color: #ffffff;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .ve-comparison-table th {
+            padding: 15px 10px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 3px solid #d4af37;
+            white-space: nowrap;
+        }
+        
+        .ve-comparison-table tbody tr {
+            border-bottom: 1px solid #e5e7eb;
+            transition: background 0.2s ease;
+        }
+        
+        .ve-comparison-table tbody tr:hover {
+            background: rgba(212, 175, 55, 0.05);
+        }
+        
+        .ve-comparison-table td {
+            padding: 12px 10px;
+            vertical-align: top;
+            color: #1a365d;
+        }
+        
+        .ve-col-no { width: 40px; text-align: center; }
+        .ve-col-image { width: 80px; }
+        .ve-col-original { min-width: 250px; max-width: 350px; }
+        .ve-col-qty { width: 60px; text-align: center; }
+        .ve-col-unit { width: 60px; }
+        .ve-col-rate { width: 100px; text-align: right; }
+        .ve-col-total { width: 120px; text-align: right; }
+        .ve-col-alternative { min-width: 280px; max-width: 350px; }
+        .ve-col-alt-image { width: 80px; }
+        .ve-col-alt-rate { width: 100px; text-align: right; }
+        .ve-col-alt-total { width: 120px; text-align: right; }
+        .ve-col-difference { width: 130px; text-align: right; }
+        
+        .ve-cell-no {
+            text-align: center;
+            font-weight: 700;
+            color: #64748b;
+        }
+        
+        .ve-cell-image,
+        .ve-cell-alt-image {
+            text-align: center;
+        }
+        
+        .ve-original-image-placeholder,
+        .ve-alt-image-empty {
+            width: 60px;
+            height: 60px;
+            background: rgba(26, 54, 93, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            margin: 0 auto;
+        }
+        
+        .ve-alt-image-wrapper {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .ve-product-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .ve-alt-image-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 2em;
+            font-weight: 700;
+        }
+        
+        .ve-item-desc-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .ve-category-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.7em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            width: fit-content;
+        }
+        
+        .ve-desc-text {
+            font-size: 0.95em;
+            line-height: 1.4;
+            color: #1a365d;
+        }
+        
+        .ve-cell-qty,
+        .ve-cell-unit {
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .ve-cell-rate,
+        .ve-cell-total,
+        .ve-cell-alt-rate,
+        .ve-cell-alt-total {
+            text-align: right;
+            font-weight: 600;
+        }
+        
+        .ve-original-total {
+            color: #d4af37;
+            font-weight: 700;
+        }
+        
+        .ve-inline-select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 0.9em;
+            color: #1a365d;
+            background: #ffffff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .ve-inline-select:focus {
+            outline: none;
+            border-color: #d4af37;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+        
+        .ve-inline-specs {
+            margin-top: 12px;
+            padding: 12px;
+            background: rgba(212, 175, 55, 0.05);
+            border-radius: 8px;
+            border-left: 3px solid #d4af37;
+        }
+        
+        .ve-specs-content {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .ve-specs-content strong {
+            color: #1a365d;
+            font-size: 0.95em;
+        }
+        
+        .ve-country-tag {
+            display: inline-block;
+            background: rgba(26, 54, 93, 0.1);
+            color: #1a365d;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: 600;
+            width: fit-content;
+        }
+        
+        .ve-specs-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .ve-specs-list li {
+            font-size: 0.85em;
+            color: #64748b;
+        }
+        
+        .ve-meta-info {
+            display: flex;
+            gap: 15px;
+            font-size: 0.8em;
+            color: #64748b;
+        }
+        
+        .ve-meta-info a {
+            color: #d4af37;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .ve-meta-info a:hover {
+            text-decoration: underline;
+        }
+        
+        .ve-diff-value {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: flex-end;
+            font-weight: 700;
+        }
+        
+        .ve-diff-value small {
+            font-size: 0.85em;
+            font-weight: 500;
+            opacity: 0.8;
+        }
+        
+        .ve-loading {
+            text-align: center;
+            padding: 40px;
+            color: #ffffff;
+            font-size: 1.2em;
+        }
+        
+        .ve-empty {
+            text-align: center;
+            padding: 40px;
+            color: #ffffff;
+            font-size: 1.1em;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .ve-modal-content {
+                margin: 20px;
+                border-radius: 16px;
+            }
+            
+            .ve-tier-tabs {
+                flex-direction: column;
+            }
+            
+            .ve-tier-tab {
+                min-width: 100%;
+            }
+            
+            .ve-summary-card {
+                grid-template-columns: 1fr;
+            }
+            
+            .ve-comparison-table {
+                font-size: 0.8em;
+            }
+            
+            .ve-comparison-table th,
+            .ve-comparison-table td {
+                padding: 8px 6px;
+            }
+            
+            .ve-col-original {
+                min-width: 180px;
+            }
+            
+            .ve-col-alternative {
+                min-width: 200px;
+            }
+        }
+        
         .loading {
             display: inline-block;
             width: 20px;
@@ -2332,7 +2769,7 @@
             <div class="card" id="multiBudgetCard" style="display:none;">
                 <h2>💰 Multi-Budget Options</h2>
                 <p style="color: #64748b; margin-bottom: 20px;">Generate multiple budget scenarios with value engineering. Works with or without costing applied.</p>
-                <button class="btn btn-info" onclick="valueEngineering()">💡 Value Engineering</button>
+                <button class="btn btn-info" onclick="generateAlternativeOffers()">💡 Generate Alternative Offers</button>
             </div>
         </div>
     </div>
@@ -2762,9 +3199,15 @@
                 const files = this.files;
                 
                 if (files.length > 0) {
-                    fileInfo.classList.add('show');
-                    fileInfo.querySelector('.file-name').innerHTML = 
-                        `<div class="loading"></div> Uploading ${files.length} file(s)...`;
+                    // Check if fileInfo element exists before accessing it
+                    if (!fileInfo) {
+                        console.warn('File info element not found for input:', this.id);
+                        // Still process the upload even if UI element is missing
+                    } else {
+                        fileInfo.classList.add('show');
+                        fileInfo.querySelector('.file-name').innerHTML = 
+                            `<div class="loading"></div> Uploading ${files.length} file(s)...`;
+                    }
                     
                     // Upload files to backend
                     uploadedFiles = [];
@@ -2776,10 +3219,14 @@
                     }
                     
                     if (uploadedFiles.length > 0) {
-                        fileInfo.querySelector('.file-name').innerHTML = 
-                            `✓ ${uploadedFiles.length} file(s) uploaded: ${uploadedFiles.map(f => f.original_name).join(', ')}`;
+                        if (fileInfo) {
+                            fileInfo.querySelector('.file-name').innerHTML = 
+                                `✓ ${uploadedFiles.length} file(s) uploaded: ${uploadedFiles.map(f => f.original_name).join(', ')}`;
+                        }
                     } else {
-                        fileInfo.classList.remove('show');
+                        if (fileInfo) {
+                            fileInfo.classList.remove('show');
+                        }
                         showError(this.id.replace('file-', ''), 'Failed to upload files');
                     }
                 }
@@ -3664,16 +4111,1332 @@
         }
         
         // Value Engineering function
-        async function valueEngineering() {
-            // Use currentFileId (from extraction) if costing hasn't been applied
-            const fileId = currentFileIdForCosting || currentFileId;
+        async function generateAlternativeOffers() {
+            console.log('generateAlternativeOffers called');
             
-            if (!fileId) {
-                showAlert('Please extract tables first', 'error');
+            // Check if stitched table exists - look for any table in the preview area
+            const stitchedTable = document.querySelector('table[border="1"]') || 
+                                  document.querySelector('table') || 
+                                  document.querySelector('.editable-table');
+            
+            console.log('Found table:', stitchedTable);
+            
+            if (!stitchedTable) {
+                showAlert('Please stitch tables first before generating alternatives', 'error');
                 return;
             }
             
-            showAlert('Value Engineering coming soon!', 'info');
+            // Show loading indicator
+            showAlert('Generating alternative offers...', 'info');
+            
+            try {
+                // Load alternatives directly from existing table (fileId not needed - we read from DOM)
+                await loadValueEngineeringData(null);
+                
+                // Create and display the alternative offers table
+                displayAlternativeOffersTable();
+                
+                showAlert('Alternative offers generated successfully!', 'success');
+            } catch (error) {
+                console.error('Value Engineering error:', error);
+                showAlert('Error generating alternatives: ' + error.message, 'error');
+            }
+        }
+        
+        // Show Value Engineering Modal
+        function showValueEngineeringModal(fileId) {
+            const modal = document.getElementById('valueEngineeringModal');
+            if (!modal) {
+                createValueEngineeringModal(fileId);
+            } else {
+                loadValueEngineeringData(fileId);
+                modal.style.display = 'block';
+            }
+        }
+        
+        // Create Value Engineering Modal
+        function createValueEngineeringModal(fileId) {
+            const modalHTML = `
+                <div id="valueEngineeringModal" class="ve-modal">
+                    <div class="ve-modal-content">
+                        <div class="ve-modal-header">
+                            <h2>📊 Quote Alternatives - Value Engineering</h2>
+                            <span class="ve-modal-close" onclick="closeValueEngineeringModal()">&times;</span>
+                        </div>
+                        
+                        <div class="ve-modal-body">
+                            <!-- Budget Tier Tabs -->
+                            <div class="ve-tier-tabs">
+                                <button class="ve-tier-tab active" data-tier="budgetary" onclick="selectBudgetTier('budgetary')">
+                                    💰 Budgetary
+                                </button>
+                                <button class="ve-tier-tab" data-tier="mid_range" onclick="selectBudgetTier('mid_range')">
+                                    ⭐ Mid-Range
+                                </button>
+                                <button class="ve-tier-tab" data-tier="high_end" onclick="selectBudgetTier('high_end')">
+                                    👑 High-End
+                                </button>
+                            </div>
+                            
+                            <!-- Summary Section -->
+                            <div class="ve-summary-card">
+                                <div class="ve-summary-item">
+                                    <span class="ve-summary-label">Original Estimate:</span>
+                                    <span class="ve-summary-value" id="veOriginalTotal">OMR 0.00</span>
+                                </div>
+                                <div class="ve-summary-item">
+                                    <span class="ve-summary-label">New Total:</span>
+                                    <span class="ve-summary-value ve-new-total" id="veNewTotal">OMR 0.00</span>
+                                </div>
+                                <div class="ve-summary-item">
+                                    <span class="ve-summary-label">Difference:</span>
+                                    <span class="ve-summary-value" id="veDifference">OMR 0.00 (0%)</span>
+                                </div>
+                                <div class="ve-summary-item">
+                                    <span class="ve-summary-label">Items Selected:</span>
+                                    <span class="ve-summary-value" id="veProgress">0 / 0</span>
+                                </div>
+                            </div>
+                            
+                            <!-- BOQ Items List -->
+                            <div id="veItemsList" class="ve-items-list">
+                                <div class="ve-loading">Loading items...</div>
+                            </div>
+                        </div>
+                        
+                        <div class="ve-modal-footer">
+                            <button class="btn btn-secondary" onclick="closeValueEngineeringModal()">Close</button>
+                            <button class="btn btn-success" onclick="exportAlternativeQuote()">📥 Export Alternative Quote</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            loadValueEngineeringData(fileId);
+        }
+        
+        // Close Value Engineering Modal
+        function closeValueEngineeringModal() {
+            const modal = document.getElementById('valueEngineeringModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+        
+        let currentVEFileId = null;
+        let currentBudgetTier = 'budgetary';
+        let veItems = [];
+        let veSelections = {};
+        
+        // Load Value Engineering Data from existing stitched table
+        async function loadValueEngineeringData(fileId) {
+            currentVEFileId = fileId;
+            
+            try {
+                // Get the existing stitched table data from DOM
+                const stitchedTable = document.querySelector('table[border="1"]') || 
+                                      document.querySelector('table') || 
+                                      document.querySelector('.editable-table');
+                
+                if (!stitchedTable) {
+                    showAlert('No stitched table found. Please stitch tables first.', 'error');
+                    return;
+                }
+                
+                // Parse the existing table to get items
+                veItems = parseStitchedTableToItems(stitchedTable);
+                
+                console.log('Parsed veItems:', veItems);
+                
+                if (veItems.length === 0) {
+                    showAlert('No items found in table', 'warning');
+                    console.warn('No items extracted from table');
+                    return;
+                }
+                
+                console.log(`Found ${veItems.length} items to process`);
+                
+                // Fetch alternatives for each item based on budget tier
+                await fetchAlternativesForItems(currentBudgetTier);
+                
+                console.log('Alternatives fetched successfully');
+                
+            } catch (error) {
+                showAlert('Error loading alternatives: ' + error.message, 'error');
+                throw error;
+            }
+        }
+        
+        // Display Alternative Offers Table
+        function displayAlternativeOffersTable() {
+            console.log('displayAlternativeOffersTable called');
+            
+            // Get the original table to copy structure
+            const originalTable = document.querySelector('table[border="1"]') || 
+                                 document.querySelector('table');
+            
+            if (!originalTable) {
+                showAlert('Original table not found', 'error');
+                return;
+            }
+            
+            // Create container for alternative offers
+            let altOffersContainer = document.getElementById('alternativeOffersContainer');
+            if (!altOffersContainer) {
+                altOffersContainer = document.createElement('div');
+                altOffersContainer.id = 'alternativeOffersContainer';
+                altOffersContainer.style.cssText = 'margin-top: 40px; padding: 30px; background: rgba(26, 54, 93, 0.95); border-radius: 15px; border: 2px solid #d4af37;';
+                
+                // Insert after the original table - try multiple strategies
+                const previewContainer = document.getElementById('preview-content');
+                if (previewContainer) {
+                    console.log('Appending to preview-content');
+                    previewContainer.appendChild(altOffersContainer);
+                } else {
+                    // Fallback: insert after the table itself
+                    console.log('Inserting after table parent');
+                    const tableParent = originalTable.parentElement;
+                    if (tableParent && tableParent.parentElement) {
+                        tableParent.parentElement.insertBefore(altOffersContainer, tableParent.nextSibling);
+                    } else {
+                        // Last resort: append to body
+                        console.log('Appending to document body');
+                        document.body.appendChild(altOffersContainer);
+                    }
+                }
+            } else {
+                console.log('Reusing existing container');
+            }
+            
+            // Build the HTML for the alternative offers section
+            let html = `
+                <div style=\"margin-bottom: 25px;\">
+                    <h3 style=\"color: #d4af37; margin-bottom: 20px; font-size: 1.8em;\">\ud83d\udca1 Alternative Offers - Value Engineering</h3>
+                    
+                    <!-- Budget Tier Selector -->
+                    <div style=\"margin-bottom: 25px; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 10px;\">
+                        <label style=\"color: #d4af37; font-weight: bold; margin-bottom: 10px; display: block;\">Select Budget Tier:</label>
+                        <div style=\"display: flex; gap: 15px; flex-wrap: wrap;\">
+                            <button onclick=\"changeBudgetTier('budgetary')\" id=\"tier-budgetary\" class=\"tier-btn active\" style=\"flex: 1; min-width: 150px; padding: 15px 25px; border: 2px solid #d4af37; border-radius: 8px; background: #d4af37; color: #1a365d; font-weight: 600; cursor: pointer; transition: all 0.3s;\">\ud83d\udcb0 Budgetary</button>
+                            <button onclick=\"changeBudgetTier('mid_range')\" id=\"tier-mid_range\" class=\"tier-btn\" style=\"flex: 1; min-width: 150px; padding: 15px 25px; border: 2px solid #d4af37; border-radius: 8px; background: transparent; color: #d4af37; font-weight: 600; cursor: pointer; transition: all 0.3s;\">⭐ Mid-Range</button>
+                            <button onclick=\"changeBudgetTier('high_end')\" id=\"tier-high_end\" class=\"tier-btn\" style=\"flex: 1; min-width: 150px; padding: 15px 25px; border: 2px solid #d4af37; border-radius: 8px; background: transparent; color: #d4af37; font-weight: 600; cursor: pointer; transition: all 0.3s;\">\ud83d\udc51 High-End</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Export Buttons -->
+                    <div style=\"margin-bottom: 25px; display: flex; gap: 15px; flex-wrap: wrap;\">
+                        <button onclick=\"exportAlternativeTable('excel')\" class=\"action-btn\" style=\"background: #10b981; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;\">\ud83d\udcbe Export to Excel</button>
+                        <button onclick=\"exportAlternativeTable('pdf')\" class=\"action-btn\" style=\"background: #ef4444; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;\">\ud83d\udcc4 Export to PDF</button>
+                        <button onclick=\"downloadAlternativeTable()\" class=\"action-btn\" style=\"background: #3b82f6; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;\">\u2b07\ufe0f Download Edited Table</button>
+                    </div>
+                </div>
+                
+                <!-- Alternative Offers Table -->
+                <div style=\"max-height: 600px; overflow: auto; border: 1px solid #d4af37; border-radius: 10px; background: white;\" id=\"altTableContainer\">
+                    <!-- Table will be inserted here -->
+                </div>
+            `;
+            
+            altOffersContainer.innerHTML = html;
+            
+            // Now create and insert the actual table
+            createAlternativeTable();
+            
+            // Scroll to the new table
+            altOffersContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        // Create the alternative table with columns
+        function createAlternativeTable() {
+            console.log('createAlternativeTable called');
+            const container = document.getElementById('altTableContainer');
+            if (!container) {
+                console.error('altTableContainer not found!');
+                return;
+            }
+            
+            console.log('Container found, creating table with', veItems.length, 'items');
+            
+            // Create table
+            const table = document.createElement('table');
+            table.border = '1';
+            table.style.cssText = 'width: 100%; border-collapse: collapse; background: white;';
+            table.contentEditable = 'true';
+            
+            console.log('Table element created');
+            
+            // Create thead with original + alternative columns
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            
+            // Original columns
+            const originalHeaders = ['SI.No', 'Image', 'Item Description', 'Qty', 'Unit', 'Unit Rate (OMR)', 'Amount (OMR)'];
+            originalHeaders.forEach(headerText => {
+                const th = document.createElement('th');
+                th.textContent = headerText;
+                th.style.cssText = 'background: #1a365d; color: #d4af37; font-weight: bold; padding: 12px; border: 1px solid #d4af37; white-space: nowrap;';
+                headerRow.appendChild(th);
+            });
+            
+            // Alternative columns
+            const altHeaders = ['Alternative Selection', 'Alt. Image', 'Alt. Brand', 'Alt. Model', 'Alt. Unit Rate (OMR)', 'Alt. Total (OMR)', 'Difference', '% Savings'];
+            altHeaders.forEach(headerText => {
+                const th = document.createElement('th');
+                th.textContent = headerText;
+                th.style.cssText = 'background: #d4af37; color: #1a365d; font-weight: bold; padding: 12px; border: 1px solid #b8941f; white-space: nowrap;';
+                headerRow.appendChild(th);
+            });
+            
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+            
+            // Create tbody with data
+            const tbody = document.createElement('tbody');
+            
+            veItems.forEach((item, index) => {
+                const row = document.createElement('tr');
+                row.style.cssText = index % 2 === 0 ? 'background: #f9fafb;' : 'background: white;';
+                
+                // Original data columns
+                const siNoCell = document.createElement('td');
+                siNoCell.contentEditable = 'true';
+                siNoCell.textContent = index + 1;
+                siNoCell.style.cssText = 'padding: 10px; border: 1px solid #ddd; text-align: center;';
+                row.appendChild(siNoCell);
+                
+                // Image cell for original item
+                const imgCell = document.createElement('td');
+                imgCell.contentEditable = 'false';
+                imgCell.style.cssText = 'padding: 5px; border: 1px solid #ddd; text-align: center;';
+                if (item.imageUrl) {
+                    const img = document.createElement('img');
+                    img.src = item.imageUrl;
+                    img.style.cssText = 'max-width: 80px; max-height: 80px; object-fit: contain;';
+                    img.alt = item.description;
+                    imgCell.appendChild(img);
+                } else {
+                    imgCell.textContent = '-';
+                }
+                row.appendChild(imgCell);
+                
+                const descCell = document.createElement('td');
+                descCell.contentEditable = 'true';
+                descCell.textContent = item.description;
+                descCell.style.cssText = 'padding: 10px; border: 1px solid #ddd;';
+                row.appendChild(descCell);
+                
+                const qtyCell = document.createElement('td');
+                qtyCell.contentEditable = 'true';
+                qtyCell.textContent = item.qty;
+                qtyCell.style.cssText = 'padding: 10px; border: 1px solid #ddd; text-align: center;';
+                row.appendChild(qtyCell);
+                
+                const unitCell = document.createElement('td');
+                unitCell.contentEditable = 'true';
+                unitCell.textContent = item.unit;
+                unitCell.style.cssText = 'padding: 10px; border: 1px solid #ddd; text-align: center;';
+                row.appendChild(unitCell);
+                
+                const rateCell = document.createElement('td');
+                rateCell.contentEditable = 'true';
+                rateCell.textContent = item.unit_rate.toFixed(2);
+                rateCell.style.cssText = 'padding: 10px; border: 1px solid #ddd; text-align: right;';
+                row.appendChild(rateCell);
+                
+                const totalCell = document.createElement('td');
+                totalCell.contentEditable = 'true';
+                totalCell.textContent = item.total.toFixed(2);
+                totalCell.style.cssText = 'padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: bold;';
+                row.appendChild(totalCell);
+                
+                // Alternative columns - Create cascading dropdowns
+                const selectCell = document.createElement('td');
+                selectCell.contentEditable = 'false';
+                selectCell.style.cssText = 'padding: 8px; border: 1px solid #ddd;';
+                
+                // Create a container for the cascading dropdowns
+                const dropdownContainer = document.createElement('div');
+                dropdownContainer.style.cssText = 'display: flex; flex-direction: column; gap: 5px;';
+                
+                // Category dropdown
+                const categorySelect = document.createElement('select');
+                categorySelect.className = 've-category-select';
+                categorySelect.style.cssText = 'width: 100%; padding: 6px; border: 1px solid #d4af37; border-radius: 4px; background: white; color: #1a365d; font-size: 0.85em;';
+                categorySelect.dataset.itemIndex = index;
+                
+                const catDefaultOption = document.createElement('option');
+                catDefaultOption.value = '';
+                catDefaultOption.textContent = '-- Select Category --';
+                categorySelect.appendChild(catDefaultOption);
+                
+                // Add category options
+                ['seating', 'desking', 'general'].forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat;
+                    option.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+                    categorySelect.appendChild(option);
+                });
+                
+                // Brand dropdown (initially disabled)
+                const brandSelect = document.createElement('select');
+                brandSelect.className = 've-brand-select';
+                brandSelect.style.cssText = 'width: 100%; padding: 6px; border: 1px solid #d4af37; border-radius: 4px; background: white; color: #1a365d; font-size: 0.85em;';
+                brandSelect.dataset.itemIndex = index;
+                brandSelect.disabled = true;
+                
+                const brandDefaultOption = document.createElement('option');
+                brandDefaultOption.value = '';
+                brandDefaultOption.textContent = '-- Select Brand --';
+                brandSelect.appendChild(brandDefaultOption);
+                
+                // Model dropdown (initially disabled)
+                const modelSelect = document.createElement('select');
+                modelSelect.className = 've-model-select';
+                modelSelect.style.cssText = 'width: 100%; padding: 6px; border: 1px solid #d4af37; border-radius: 4px; background: white; color: #1a365d; font-size: 0.85em;';
+                modelSelect.dataset.itemIndex = index;
+                modelSelect.disabled = true;
+                
+                const modelDefaultOption = document.createElement('option');
+                modelDefaultOption.value = '';
+                modelDefaultOption.textContent = '-- Select Model --';
+                modelSelect.appendChild(modelDefaultOption);
+                
+                // Event listener for category change
+                categorySelect.addEventListener('change', (e) => {
+                    const selectedCategory = e.target.value;
+                    item.category = selectedCategory;
+                    item.subcategory = null;
+                    item.selectedBrand = null;
+                    item.selectedModel = null;
+                    
+                    // Reset and populate brand dropdown
+                    brandSelect.innerHTML = '';
+                    brandSelect.appendChild(brandDefaultOption.cloneNode(true));
+                    modelSelect.innerHTML = '';
+                    modelSelect.appendChild(modelDefaultOption.cloneNode(true));
+                    modelSelect.disabled = true;
+                    
+                    if (selectedCategory === 'general') {
+                        // For general category, add Local option
+                        brandSelect.disabled = false;
+                        const localOption = document.createElement('option');
+                        localOption.value = 'Local';
+                        localOption.textContent = 'Local';
+                        brandSelect.appendChild(localOption);
+                    } else if (selectedCategory && allBrandsData[selectedCategory]) {
+                        brandSelect.disabled = false;
+                        Object.keys(allBrandsData[selectedCategory]).forEach(brandName => {
+                            const option = document.createElement('option');
+                            option.value = brandName;
+                            option.textContent = brandName;
+                            brandSelect.appendChild(option);
+                        });
+                    } else {
+                        brandSelect.disabled = true;
+                    }
+                    
+                    // Clear alternative data display
+                    clearAlternativeDataInRow(row);
+                });
+                
+                // Event listener for brand change
+                brandSelect.addEventListener('change', (e) => {
+                    const selectedBrand = e.target.value;
+                    item.selectedBrand = selectedBrand;
+                    item.selectedModel = null;
+                    
+                    // Reset and populate model dropdown
+                    modelSelect.innerHTML = '';
+                    modelSelect.appendChild(modelDefaultOption.cloneNode(true));
+                    
+                    if (selectedBrand === 'Local' && item.category === 'general') {
+                        // For Local brand in general category, add general item option
+                        modelSelect.disabled = false;
+                        const generalOption = document.createElement('option');
+                        generalOption.value = JSON.stringify({
+                            model: 'General Item',
+                            price_range: '0-0',
+                            features: ['Custom item'],
+                            subcategory: 'general'
+                        });
+                        generalOption.textContent = 'General Item';
+                        modelSelect.appendChild(generalOption);
+                    } else if (selectedBrand && item.category && allBrandsData[item.category][selectedBrand]) {
+                        modelSelect.disabled = false;
+                        const brandData = allBrandsData[item.category][selectedBrand];
+                        
+                        // Add all models from all subcategories for this brand
+                        Object.keys(brandData.models).forEach(subcategory => {
+                            brandData.models[subcategory].forEach(model => {
+                                const option = document.createElement('option');
+                                option.value = JSON.stringify({
+                                    model: model.model,
+                                    price_range: model.price_range,
+                                    features: model.features,
+                                    subcategory: subcategory
+                                });
+                                // Display without price
+                                option.textContent = model.model;
+                                modelSelect.appendChild(option);
+                            });
+                        });
+                    } else {
+                        modelSelect.disabled = true;
+                    }
+                    
+                    // Clear alternative data display
+                    clearAlternativeDataInRow(row);
+                });
+                
+                // Event listener for model change
+                modelSelect.addEventListener('change', (e) => {
+                    const selectedValue = e.target.value;
+                    if (selectedValue) {
+                        const modelData = JSON.parse(selectedValue);
+                        item.selectedModel = modelData.model;
+                        item.subcategory = modelData.subcategory;
+                        
+                        // Calculate alternative pricing
+                        const priceRange = modelData.price_range.split('-');
+                        const avgPrice = (parseFloat(priceRange[0]) + parseFloat(priceRange[1])) / 2;
+                        const altTotal = avgPrice * item.qty;
+                        
+                        // Handle Local/General differently - no brand data lookup needed
+                        if (item.selectedBrand === 'Local' && item.category === 'general') {
+                            // For general items, use original pricing as alternative
+                            updateAlternativeDataInRow(row, {
+                                brand: 'Local',
+                                model: modelData.model,
+                                unit_rate: item.unit_rate,
+                                total: item.total,
+                                country: 'Local'
+                            }, item);
+                        } else {
+                            const brandData = allBrandsData[item.category][item.selectedBrand];
+                            
+                            // Update row with alternative data
+                            updateAlternativeDataInRow(row, {
+                                brand: item.selectedBrand,
+                                model: modelData.model,
+                                unit_rate: avgPrice,
+                                total: altTotal,
+                                country: brandData.country
+                            }, item);
+                        }
+                    }
+                });
+                
+                dropdownContainer.appendChild(categorySelect);
+                dropdownContainer.appendChild(brandSelect);
+                dropdownContainer.appendChild(modelSelect);
+                selectCell.appendChild(dropdownContainer);
+                
+                row.appendChild(selectCell);
+                
+                // Alternative image cell
+                const altImgCell = document.createElement('td');
+                altImgCell.contentEditable = 'false';
+                altImgCell.className = `ve-alt-image-${index}`;
+                altImgCell.style.cssText = 'padding: 5px; border: 1px solid #ddd; text-align: center;';
+                altImgCell.textContent = '-';
+                row.appendChild(altImgCell);
+                
+                // Alternative detail columns
+                ['brand', 'model', 'rate', 'total', 'diff', 'savings'].forEach(type => {
+                    const cell = document.createElement('td');
+                    cell.contentEditable = (type === 'brand' || type === 'model' || type === 'rate' || type === 'total') ? 'true' : 'false';
+                    cell.className = `ve-alt-${type}-${index}`;
+                    cell.textContent = '-';
+                    cell.style.cssText = 'padding: 10px; border: 1px solid #ddd; text-align: ' + (type === 'rate' || type === 'total' || type === 'diff' || type === 'savings' ? 'right' : 'left') + ';';
+                    if (type === 'diff' || type === 'savings') {
+                        cell.style.fontWeight = 'bold';
+                    }
+                    row.appendChild(cell);
+                });
+                
+                tbody.appendChild(row);
+            });
+            
+            table.appendChild(tbody);
+            console.log('Table built, now appending to container');
+            console.log('Container element:', container);
+            console.log('Table element:', table);
+            container.innerHTML = '';
+            container.appendChild(table);
+            
+            console.log('Alternative table created and displayed');
+            console.log('Container after append:', container.innerHTML.substring(0, 200));
+        }
+        
+        // Update alternative data in row when model is selected
+        function updateAlternativeDataInRow(row, altData, item) {
+            const itemIndex = item.rowIndex;
+            
+            // Update cells with alternative data
+            const imgCell = row.querySelector(`.ve-alt-image-${itemIndex}`);
+            const brandCell = row.querySelector(`.ve-alt-brand-${itemIndex}`);
+            const modelCell = row.querySelector(`.ve-alt-model-${itemIndex}`);
+            const rateCell = row.querySelector(`.ve-alt-rate-${itemIndex}`);
+            const totalCell = row.querySelector(`.ve-alt-total-${itemIndex}`);
+            const diffCell = row.querySelector(`.ve-alt-diff-${itemIndex}`);
+            const savingsCell = row.querySelector(`.ve-alt-savings-${itemIndex}`);
+            
+            if (brandCell) brandCell.textContent = altData.brand;
+            if (modelCell) modelCell.textContent = altData.model;
+            if (rateCell) rateCell.textContent = altData.unit_rate.toFixed(2);
+            if (totalCell) totalCell.textContent = altData.total.toFixed(2);
+            
+            // Fetch and display product image
+            if (imgCell && altData.brand !== 'Local') {
+                imgCell.innerHTML = '<div style="color: #999; font-size: 0.8em;">Loading...</div>';
+                fetchProductImage(altData.brand, altData.model, item.category)
+                    .then(imageUrl => {
+                        if (imageUrl) {
+                            const img = document.createElement('img');
+                            img.src = imageUrl;
+                            img.style.cssText = 'max-width: 80px; max-height: 80px; object-fit: contain;';
+                            img.alt = altData.model;
+                            img.onerror = () => {
+                                imgCell.textContent = '📷';
+                            };
+                            imgCell.innerHTML = '';
+                            imgCell.appendChild(img);
+                        } else {
+                            imgCell.textContent = '📷';
+                        }
+                    })
+                    .catch(() => {
+                        imgCell.textContent = '📷';
+                    });
+            } else if (imgCell) {
+                imgCell.textContent = '-';
+            }
+            
+            // Calculate difference
+            const difference = item.total - altData.total;
+            const savingsPercent = item.total > 0 ? (difference / item.total * 100) : 0;
+            
+            if (diffCell) {
+                diffCell.textContent = difference.toFixed(2);
+                diffCell.style.color = difference >= 0 ? '#10b981' : '#ef4444';
+            }
+            
+            if (savingsCell) {
+                savingsCell.textContent = savingsPercent.toFixed(1) + '%';
+                savingsCell.style.color = difference >= 0 ? '#10b981' : '#ef4444';
+            }
+        }
+        
+        // Fetch product image from brand website or placeholder
+        async function fetchProductImage(brand, model, category) {
+            // This is a placeholder - in production, implement API calls to brand websites
+            // For now, return placeholder or try to construct URL from brand website
+            
+            try {
+                // Try to get website from brand data
+                let website = null;
+                if (category && allBrandsData[category]) {
+                    const brandData = allBrandsData[category][brand];
+                    if (brandData && brandData.website) {
+                        website = brandData.website;
+                    }
+                }
+                
+                // For now, return a placeholder based on brand/model
+                // In production, implement actual image scraping or API integration
+                console.log(`Fetching image for ${brand} - ${model} from ${website}`);
+                
+                // Placeholder: Use a generic furniture icon or product placeholder
+                // You can replace this with actual image URLs from your database
+                return null; // Return null to show icon instead
+                
+            } catch (error) {
+                console.error('Error fetching product image:', error);
+                return null;
+            }
+        }
+        
+        // Clear alternative data in row
+        function clearAlternativeDataInRow(row) {
+            ['image', 'brand', 'model', 'rate', 'total', 'diff', 'savings'].forEach(type => {
+                const cells = row.querySelectorAll(`[class*="ve-alt-${type}-"]`);
+                cells.forEach(cell => {
+                    cell.textContent = '-';
+                    cell.innerHTML = '-';
+                    if (type === 'diff' || type === 'savings') {
+                        cell.style.color = '';
+                    }
+                });
+            });
+        }
+        
+        // Helper function to get brands for a category
+        function getCategoryBrands(category) {
+            if (!allBrandsData || !allBrandsData[category]) {
+                return [];
+            }
+            return Object.keys(allBrandsData[category]);
+        }
+        
+        // Helper function to get models for a brand in a category
+        function getBrandModels(category, brandName) {
+            if (!allBrandsData || !allBrandsData[category] || !allBrandsData[category][brandName]) {
+                return {};
+            }
+            return allBrandsData[category][brandName].models || {};
+        }
+        
+        // Change budget tier and regenerate alternatives
+        async function changeBudgetTier(tier) {
+            console.log('Changing budget tier to:', tier);
+            currentBudgetTier = tier;
+            
+            // Update button styles
+            document.querySelectorAll('.tier-btn').forEach(btn => {
+                btn.style.background = 'transparent';
+                btn.style.color = '#d4af37';
+            });
+            document.getElementById(`tier-${tier}`).style.background = '#d4af37';
+            document.getElementById(`tier-${tier}`).style.color = '#1a365d';
+            
+            // Regenerate alternatives
+            showAlert('Loading alternatives for ' + tier.replace('_', '-') + ' tier...', 'info');
+            
+            try {
+                await fetchAlternativesForItems(tier);
+                createAlternativeTable();
+                showAlert('Alternatives updated successfully!', 'success');
+            } catch (error) {
+                showAlert('Error updating alternatives: ' + error.message, 'error');
+            }
+        }
+        
+        // Export alternative table
+        function exportAlternativeTable(format) {
+            showAlert(`Export to ${format} coming soon!`, 'info');
+        }
+        
+        // Download alternative table
+        function downloadAlternativeTable() {
+            const table = document.querySelector('#altTableContainer table');
+            if (!table) {
+                showAlert('No table to download', 'error');
+                return;
+            }
+            
+            const html = table.outerHTML;
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'alternative-offers-' + new Date().toISOString().slice(0, 10) + '.html';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        // Parse stitched table from DOM to extract items
+        function parseStitchedTableToItems(tableElement) {
+            const items = [];
+            const rows = tableElement.querySelectorAll('tbody tr');
+            const headers = [];
+            
+            console.log('parseStitchedTableToItems: Found', rows.length, 'rows');
+            
+            // Get headers - first try thead, then first tbody row
+            let headerCells = tableElement.querySelectorAll('thead th');
+            
+            if (headerCells.length === 0) {
+                console.log('No thead headers, checking first tbody row for headers...');
+                // If no thead, check if first row contains headers
+                const firstRow = tableElement.querySelector('tbody tr');
+                if (firstRow) {
+                    headerCells = firstRow.querySelectorAll('td');
+                    console.log('Found', headerCells.length, 'cells in first row');
+                }
+            }
+            
+            headerCells.forEach(cell => {
+                headers.push(cell.textContent.trim().toLowerCase());
+            });
+            
+            console.log('Table headers:', headers);
+            
+            if (headers.length === 0) {
+                console.error('No headers found in table');
+                return items;
+            }
+            
+            // Determine starting row index (skip first row if it was used as header)
+            const startIndex = tableElement.querySelector('thead') ? 0 : 1;
+            console.log('Starting from row index:', startIndex);
+            
+            rows.forEach((row, index) => {
+                if (index < startIndex) {
+                    console.log(`Skipping row ${index} (header row)`);
+                    return;
+                }
+                
+                const cells = row.querySelectorAll('td');
+                if (cells.length === 0) return;
+                
+                const rowData = {};
+                let imageUrl = null;
+                
+                cells.forEach((cell, i) => {
+                    if (i < headers.length) {
+                        rowData[headers[i]] = cell.textContent.trim();
+                        
+                        // Check if this cell contains an image
+                        const img = cell.querySelector('img');
+                        if (img && img.src) {
+                            imageUrl = img.src;
+                        }
+                    }
+                });
+                
+                console.log(`Row ${index} data:`, rowData);
+                if (imageUrl) console.log(`Row ${index} image:`, imageUrl);
+                
+                // Extract item information
+                const description = getValueFromRowData(rowData, ['description', 'item', 'item description', 'particulars']);
+                const qty = getValueFromRowData(rowData, ['qty', 'quantity', 'qnty']);
+                const unit = getValueFromRowData(rowData, ['unit', 'uom']);
+                const unitRate = getValueFromRowData(rowData, ['unit rate', 'rate', 'unit price', 'price']);
+                const total = getValueFromRowData(rowData, ['total', 'amount', 'total amount']);
+                
+                console.log(`Row ${index} extracted - Desc: ${description}, Qty: ${qty}, Rate: ${unitRate}`);
+                
+                // Skip if no description or looks like header
+                if (!description || description.length < 5) {
+                    console.log(`Skipping row ${index}: no description or too short`);
+                    return;
+                }
+                if (description.toLowerCase().includes('description') || description.toLowerCase().includes('item')) {
+                    console.log(`Skipping row ${index}: looks like header`);
+                    return;
+                }
+                
+                // Don't categorize automatically - let user choose
+                const item = {
+                    rowIndex: index,
+                    description: description,
+                    qty: parseNumber(qty),
+                    unit: unit,
+                    unit_rate: parseNumber(unitRate),
+                    total: parseNumber(total),
+                    imageUrl: imageUrl,
+                    category: null,
+                    subcategory: null,
+                    selectedBrand: null,
+                    selectedModel: null
+                };
+                
+                // Only add items with meaningful data
+                if (item.qty > 0 || item.unit_rate > 0) {
+                    items.push(item);
+                    console.log(`Added item ${items.length}:`, item.description.substring(0, 50));
+                } else {
+                    console.log(`Skipping row ${index}: no qty or rate`);
+                }
+            });
+            
+            console.log(`Total items extracted: ${items.length}`);
+            return items;
+        }
+        
+        // Helper function to get value from row data
+        function getValueFromRowData(rowData, possibleKeys) {
+            for (const key of possibleKeys) {
+                for (const rowKey in rowData) {
+                    if (rowKey.toLowerCase().includes(key)) {
+                        return rowData[rowKey];
+                    }
+                }
+            }
+            return '';
+        }
+        
+        // Helper function to parse numbers
+        function parseNumber(value) {
+            if (typeof value === 'number') return value;
+            const cleaned = String(value).replace(/[^\d.-]/g, '');
+            return cleaned ? parseFloat(cleaned) : 0;
+        }
+        
+        // Categorize item based on description
+        function categorizeItem(description) {
+            const descLower = description.toLowerCase();
+            
+            // Seating keywords
+            if (descLower.includes('chair') || descLower.includes('seat') || descLower.includes('sofa') || 
+                descLower.includes('stool') || descLower.includes('bench') || descLower.includes('lounge')) {
+                
+                if (descLower.includes('executive') || descLower.includes('director') || descLower.includes('manager')) {
+                    return {category: 'seating', subcategory: 'executive_chairs'};
+                } else if (descLower.includes('task') || descLower.includes('office') || descLower.includes('work')) {
+                    return {category: 'seating', subcategory: 'task_chairs'};
+                } else if (descLower.includes('visitor') || descLower.includes('guest')) {
+                    return {category: 'seating', subcategory: 'visitor_chairs'};
+                } else if (descLower.includes('conference') || descLower.includes('meeting')) {
+                    return {category: 'seating', subcategory: 'conference_chairs'};
+                } else if (descLower.includes('sofa') || descLower.includes('couch')) {
+                    return {category: 'seating', subcategory: 'sofas'};
+                } else {
+                    return {category: 'seating', subcategory: 'task_chairs'};
+                }
+            }
+            
+            // Desking keywords
+            if (descLower.includes('desk') || descLower.includes('table') || descLower.includes('workstation') ||
+                descLower.includes('cabinet') || descLower.includes('pedestal') || descLower.includes('locker')) {
+                
+                if (descLower.includes('executive') || descLower.includes('director') || descLower.includes('manager')) {
+                    return {category: 'desking', subcategory: 'executive_desks'};
+                } else if (descLower.includes('workstation') || descLower.includes('work desk')) {
+                    return {category: 'desking', subcategory: 'workstations'};
+                } else if (descLower.includes('meeting') || descLower.includes('conference')) {
+                    return {category: 'desking', subcategory: 'meeting_tables'};
+                } else if (descLower.includes('cabinet')) {
+                    return {category: 'desking', subcategory: 'cabinets'};
+                } else if (descLower.includes('pedestal')) {
+                    return {category: 'desking', subcategory: 'pedestals'};
+                } else {
+                    return {category: 'desking', subcategory: 'workstations'};
+                }
+            }
+            
+            return {category: 'general', subcategory: 'general'};
+        }
+        
+        // Store all available brands and models globally
+        let allBrandsData = {};
+        
+        // Fetch all brands and models from backend for user selection
+        async function fetchAlternativesForItems(budgetTier) {
+            try {
+                // Fetch brands for both seating and desking categories
+                const categories = ['seating', 'desking'];
+                allBrandsData = {};
+                
+                for (const category of categories) {
+                    const response = await fetch(`/api/brands/list?tier=${budgetTier}&category=${category}`);
+                    const data = await response.json();
+                    
+                    if (data.success && data.brands) {
+                        if (!allBrandsData[category]) {
+                            allBrandsData[category] = {};
+                        }
+                        
+                        // Fetch models for each brand
+                        for (const brand of data.brands) {
+                            allBrandsData[category][brand.name] = {
+                                country: brand.country,
+                                website: brand.website,
+                                models: {}
+                            };
+                            
+                            // Get subcategories for this category
+                            const subcatResponse = await fetch(`/api/brands/subcategories?category=${category}`);
+                            const subcatData = await subcatResponse.json();
+                            
+                            if (subcatData.success && subcatData.subcategories) {
+                                for (const subcat of subcatData.subcategories) {
+                                    const modelsResponse = await fetch(`/api/brands/models?tier=${budgetTier}&category=${category}&brand=${encodeURIComponent(brand.name)}&subcategory=${subcat}`);
+                                    const modelsData = await modelsResponse.json();
+                                    
+                                    if (modelsData.success && modelsData.models && modelsData.models.length > 0) {
+                                        allBrandsData[category][brand.name].models[subcat] = modelsData.models;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                console.log('All brands data loaded:', allBrandsData);
+            } catch (error) {
+                console.error('Error fetching brands data:', error);
+            }
+        }
+        
+        // Estimate lead time
+        function estimateLeadTime(tier, country) {
+            const leadTimes = {
+                'budgetary': '2-3 weeks',
+                'mid_range': '4-6 weeks',
+                'high_end': '6-10 weeks'
+            };
+            
+            if (['China', 'Taiwan', 'Malaysia'].includes(country)) {
+                return leadTimes[tier] || '4-6 weeks';
+            } else if (country === 'Turkey') {
+                return tier === 'budgetary' ? '3-5 weeks' : '5-7 weeks';
+            } else {
+                return leadTimes[tier] || '6-8 weeks';
+            }
+        }
+        
+        // Select Budget Tier
+        function selectBudgetTier(tier) {
+            currentBudgetTier = tier;
+            
+            // Update tab UI
+            document.querySelectorAll('.ve-tier-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.dataset.tier === tier) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            // Reload data
+            if (currentVEFileId) {
+                loadValueEngineeringData(currentVEFileId);
+            }
+        }
+        
+        // Render VE Items
+        function renderVEItems() {
+            const stitchedTable = document.querySelector('table[border="1"]') || 
+                                  document.querySelector('table') || 
+                                  document.querySelector('.editable-table');
+            
+            if (!stitchedTable) {
+                showAlert('Stitched table not found', 'error');
+                return;
+            }
+            
+            // Get or create thead
+            let thead = stitchedTable.querySelector('thead');
+            if (!thead) {
+                thead = document.createElement('thead');
+                stitchedTable.insertBefore(thead, stitchedTable.firstChild);
+            }
+            
+            // Get the header row
+            let headerRow = thead.querySelector('tr');
+            if (!headerRow) {
+                headerRow = document.createElement('tr');
+                thead.appendChild(headerRow);
+            }
+            
+            // Check if alternative columns already exist
+            const existingAltHeader = Array.from(headerRow.querySelectorAll('th')).find(th => 
+                th.textContent.trim() === 'Alternative Selection'
+            );
+            
+            if (!existingAltHeader) {
+                // Add new column headers for alternatives
+                const alternativeHeaders = [
+                    'Alternative Selection',
+                    'Alt. Brand',
+                    'Alt. Model',
+                    'Alt. Unit Rate (AED)',
+                    'Alt. Total (AED)',
+                    'Difference (AED)',
+                    '% Savings'
+                ];
+                
+                alternativeHeaders.forEach(headerText => {
+                    const th = document.createElement('th');
+                    th.textContent = headerText;
+                    th.style.cssText = 'background: #d4af37; color: #1a365d; font-weight: bold; padding: 12px; border: 1px solid #b8942f; white-space: nowrap;';
+                    headerRow.appendChild(th);
+                });
+            }
+            
+            // Get tbody
+            const tbody = stitchedTable.querySelector('tbody');
+            if (!tbody) {
+                showAlert('Table body not found', 'error');
+                console.error('No tbody found in table');
+                return;
+            }
+            
+            console.log('Processing table with', tbody.querySelectorAll('tr').length, 'rows');
+            console.log('veItems count:', veItems.length);
+            
+            // Process each row that has matching veItems
+            const rows = tbody.querySelectorAll('tr');
+            let veItemIndex = 0;
+            let rowsProcessed = 0;
+            
+            rows.forEach((row, rowIndex) => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length === 0) return;
+                
+                // Check if this row corresponds to a veItem
+                if (veItemIndex >= veItems.length) return;
+                
+                const item = veItems[veItemIndex];
+                
+                console.log(`Row ${rowIndex}: ${cells.length} cells, veItem ${veItemIndex}:`, item.description.substring(0, 50));
+                
+                // Check if row already has alternative columns
+                const existingAltCell = Array.from(cells).find((cell, idx) => 
+                    idx >= cells.length - 7
+                );
+                
+                if (cells.length < headerRow.querySelectorAll('th').length) {
+                    // Add alternative columns to this row
+                    
+                    // Alternative Selection Dropdown
+                    const selectCell = document.createElement('td');
+                    selectCell.contentEditable = 'false';
+                    selectCell.style.cssText = 'padding: 8px; border: 1px solid #ddd; background: white;';
+                    
+                    if (item.alternatives && item.alternatives.length > 0) {
+                        const select = document.createElement('select');
+                        select.className = 've-alternative-select';
+                        select.style.cssText = 'width: 100%; padding: 6px; border: 1px solid #d4af37; border-radius: 4px; background: white; color: #1a365d;';
+                        select.dataset.itemIndex = veItemIndex;
+                        
+                        // Default option
+                        const defaultOption = document.createElement('option');
+                        defaultOption.value = '';
+                        defaultOption.textContent = 'Select alternative...';
+                        select.appendChild(defaultOption);
+                        
+                        // Add alternatives
+                        item.alternatives.forEach((alt, altIndex) => {
+                            const option = document.createElement('option');
+                            option.value = altIndex;
+                            option.textContent = `${alt.brand} - ${alt.model} (${alt.price_range} AED)`;
+                            select.appendChild(option);
+                        });
+                        
+                        select.addEventListener('change', (e) => {
+                            const itemIdx = parseInt(e.target.dataset.itemIndex);
+                            const altIdx = parseInt(e.target.value);
+                            updateAlternativeSelection(itemIdx, altIdx, row);
+                        });
+                        
+                        selectCell.appendChild(select);
+                    } else {
+                        selectCell.textContent = 'No alternatives';
+                        selectCell.style.color = '#999';
+                        selectCell.style.fontStyle = 'italic';
+                    }
+                    
+                    row.appendChild(selectCell);
+                    
+                    // Brand Cell
+                    const brandCell = document.createElement('td');
+                    brandCell.contentEditable = 'true';
+                    brandCell.className = 've-brand-cell';
+                    brandCell.style.cssText = 'padding: 8px; border: 1px solid #ddd; background: white;';
+                    brandCell.textContent = '-';
+                    row.appendChild(brandCell);
+                    
+                    // Model Cell
+                    const modelCell = document.createElement('td');
+                    modelCell.contentEditable = 'true';
+                    modelCell.className = 've-model-cell';
+                    modelCell.style.cssText = 'padding: 8px; border: 1px solid #ddd; background: white;';
+                    modelCell.textContent = '-';
+                    row.appendChild(modelCell);
+                    
+                    // Alternative Unit Rate Cell
+                    const altRateCell = document.createElement('td');
+                    altRateCell.contentEditable = 'true';
+                    altRateCell.className = 've-rate-cell';
+                    altRateCell.style.cssText = 'padding: 8px; border: 1px solid #ddd; text-align: right; background: white;';
+                    altRateCell.textContent = '0.00';
+                    row.appendChild(altRateCell);
+                    
+                    // Alternative Total Cell
+                    const altTotalCell = document.createElement('td');
+                    altTotalCell.contentEditable = 'true';
+                    altTotalCell.className = 've-total-cell';
+                    altTotalCell.style.cssText = 'padding: 8px; border: 1px solid #ddd; text-align: right; background: white;';
+                    altTotalCell.textContent = '0.00';
+                    row.appendChild(altTotalCell);
+                    
+                    // Difference Cell
+                    const diffCell = document.createElement('td');
+                    diffCell.contentEditable = 'false';
+                    diffCell.className = 've-diff-cell';
+                    diffCell.style.cssText = 'padding: 8px; border: 1px solid #ddd; text-align: right; font-weight: bold; background: white;';
+                    diffCell.textContent = '0.00';
+                    row.appendChild(diffCell);
+                    
+                    // Savings Percentage Cell
+                    const savingsCell = document.createElement('td');
+                    savingsCell.contentEditable = 'false';
+                    savingsCell.className = 've-savings-cell';
+                    savingsCell.style.cssText = 'padding: 8px; border: 1px solid #ddd; text-align: right; font-weight: bold; background: white;';
+                    savingsCell.textContent = '0%';
+                    row.appendChild(savingsCell);
+                    rowsProcessed++;
+                }
+                
+                veItemIndex++;
+            });
+            
+            console.log(`Finished: Processed ${rowsProcessed} rows, ${veItemIndex} items`);
+            
+            // Add event listeners for manual edits
+            addVECellEditListeners();
+            
+            // Force table to reflow/repaint
+            stitchedTable.style.display = 'none';
+            stitchedTable.offsetHeight; // Trigger reflow
+            stitchedTable.style.display = '';
+            
+            console.log('Table updated and refreshed');
+        }
+        
+        // Add listeners for manual edits in VE cells
+        function addVECellEditListeners() {
+            const table = document.querySelector('table[border="1"]') || 
+                         document.querySelector('table') || 
+                         document.querySelector('.editable-table');
+            
+            if (!table) return;
+            
+            // Listen for changes in rate and total cells
+            table.addEventListener('input', (e) => {
+                const target = e.target;
+                if (target.classList.contains('ve-rate-cell') || target.classList.contains('ve-total-cell')) {
+                    const row = target.closest('tr');
+                    recalculateDifference(row);
+                }
+            });
+        }
+        
+        // Update alternative selection in row
+        function updateAlternativeSelection(itemIndex, altIndex, row) {
+            const item = veItems[itemIndex];
+            if (!item || !item.alternatives || altIndex < 0 || altIndex >= item.alternatives.length) {
+                return;
+            }
+            
+            const alternative = item.alternatives[altIndex];
+            
+            // Update cells
+            const brandCell = row.querySelector('.ve-brand-cell');
+            const modelCell = row.querySelector('.ve-model-cell');
+            const rateCell = row.querySelector('.ve-rate-cell');
+            const totalCell = row.querySelector('.ve-total-cell');
+            
+            if (brandCell) brandCell.textContent = alternative.brand;
+            if (modelCell) modelCell.textContent = alternative.model;
+            if (rateCell) rateCell.textContent = alternative.unit_rate.toFixed(2);
+            if (totalCell) totalCell.textContent = alternative.total.toFixed(2);
+            
+            // Recalculate difference
+            recalculateDifference(row);
+            
+            // Store selection
+            veSelections[itemIndex] = {
+                alternative: alternative,
+                altIndex: altIndex
+            };
+            
+            updateVESummary();
+        }
+        
+        // Recalculate difference for a row
+        function recalculateDifference(row) {
+            const cells = row.querySelectorAll('td');
+            if (cells.length === 0) return;
+            
+            // Find original total (look for total column in original columns)
+            let originalTotal = 0;
+            const table = document.querySelector('table[border="1"]') || 
+                         document.querySelector('table') || 
+                         document.querySelector('.editable-table');
+            
+            const headerCells = table ? table.querySelectorAll('thead th') : [];
+            const headers = Array.from(headerCells).map(th => th.textContent.trim().toLowerCase());
+            
+            const totalIndex = headers.findIndex(h => h.includes('total') || h.includes('amount'));
+            if (totalIndex >= 0 && totalIndex < cells.length) {
+                originalTotal = parseNumber(cells[totalIndex].textContent);
+            }
+            
+            // Get alternative total
+            const altTotalCell = row.querySelector('.ve-total-cell');
+            const altTotal = altTotalCell ? parseNumber(altTotalCell.textContent) : 0;
+            
+            // Calculate difference and savings
+            const difference = originalTotal - altTotal;
+            const savingsPercent = originalTotal > 0 ? (difference / originalTotal * 100) : 0;
+            
+            // Update cells
+            const diffCell = row.querySelector('.ve-diff-cell');
+            const savingsCell = row.querySelector('.ve-savings-cell');
+            
+            if (diffCell) {
+                diffCell.textContent = difference.toFixed(2);
+                if (difference > 0) {
+                    diffCell.style.color = '#10b981'; // Green for savings
+                } else if (difference < 0) {
+                    diffCell.style.color = '#ef4444'; // Red for increase
+                } else {
+                    diffCell.style.color = '#6b7280'; // Gray for no change
+                }
+            }
+            
+            if (savingsCell) {
+                savingsCell.textContent = savingsPercent.toFixed(1) + '%';
+                if (savingsPercent > 0) {
+                    savingsCell.style.color = '#10b981';
+                } else if (savingsPercent < 0) {
+                    savingsCell.style.color = '#ef4444';
+                } else {
+                    savingsCell.style.color = '#6b7280';
+                }
+            }
+            
+            updateVESummary();
+        }
+        
+        // Update VE Summary
+        function updateVESummary() {
+            let originalTotal = 0;
+            let newTotal = 0;
+            let selectedCount = 0;
+            
+            veItems.forEach((item, index) => {
+                originalTotal += item.total || 0;
+                
+                if (veSelections[index]) {
+                    newTotal += veSelections[index].alternative.total;
+                    selectedCount++;
+                } else {
+                    newTotal += item.total || 0;
+                }
+            });
+            
+            const totalSavings = originalTotal - newTotal;
+            const percentageSavings = originalTotal > 0 ? (totalSavings / originalTotal * 100) : 0;
+            
+            // Update summary display
+            document.getElementById('veSummaryItems').textContent = veItems.length;
+            document.getElementById('veSummarySelected').textContent = selectedCount;
+            document.getElementById('veSummaryOriginal').textContent = originalTotal.toFixed(2) + ' AED';
+            document.getElementById('veSummaryNew').textContent = newTotal.toFixed(2) + ' AED';
+            document.getElementById('veSummarySavings').textContent = totalSavings.toFixed(2) + ' AED (' + percentageSavings.toFixed(1) + '%)';
+            
+            const savingsElement = document.getElementById('veSummarySavings');
+            if (totalSavings > 0) {
+                savingsElement.style.color = '#10b981';
+            } else if (totalSavings < 0) {
+                savingsElement.style.color = '#ef4444';
+            } else {
+                savingsElement.style.color = '#6b7280';
+            }
+        }
+        
+        // Export Alternative Quote
+        async function exportAlternativeQuote() {
+            if (Object.keys(veSelections).length === 0) {
+                showAlert('Please select at least one alternative', 'warning');
+                return;
+            }
+            
+            showAlert('Export functionality coming soon!', 'info');
         }
         
         // Initialize costing sliders on page load

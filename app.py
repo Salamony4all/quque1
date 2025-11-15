@@ -760,7 +760,7 @@ def generate_mas(file_id):
 def value_engineering(file_id):
     """Generate value-engineered alternatives"""
     data = request.json
-    budget_option = data.get('budget_option', 'medium')
+    budget_option = data.get('budget_option', 'mid_range')
     
     try:
         from utils.value_engineering import ValueEngineer
@@ -771,6 +771,98 @@ def value_engineering(file_id):
             'success': True,
             'alternatives': result,
             'message': 'Alternatives generated successfully'
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/brands/tiers', methods=['GET'])
+def get_tiers():
+    """Get available budget tiers"""
+    try:
+        from utils.value_engineering import ValueEngineer
+        engineer = ValueEngineer()
+        tiers = engineer.get_tiers()
+        
+        return jsonify({
+            'success': True,
+            'tiers': tiers
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/brands/categories', methods=['GET'])
+def get_categories():
+    """Get available categories"""
+    try:
+        from utils.value_engineering import ValueEngineer
+        engineer = ValueEngineer()
+        categories = engineer.get_categories()
+        
+        return jsonify({
+            'success': True,
+            'categories': categories
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/brands/list', methods=['GET'])
+def get_brands_list():
+    """Get brands for a specific tier and category"""
+    tier = request.args.get('tier', 'mid_range')
+    category = request.args.get('category', 'seating')
+    
+    try:
+        from utils.value_engineering import ValueEngineer
+        engineer = ValueEngineer()
+        brands = engineer.get_available_brands(tier, category)
+        
+        return jsonify({
+            'success': True,
+            'brands': brands,
+            'tier': tier,
+            'category': category
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/brands/models', methods=['GET'])
+def get_brand_models_api():
+    """Get models for a specific brand"""
+    tier = request.args.get('tier', 'mid_range')
+    category = request.args.get('category', 'seating')
+    brand = request.args.get('brand', '')
+    subcategory = request.args.get('subcategory', 'task_chairs')
+    
+    try:
+        from utils.value_engineering import ValueEngineer
+        engineer = ValueEngineer()
+        models = engineer.get_brand_models(tier, category, brand, subcategory)
+        
+        return jsonify({
+            'success': True,
+            'models': models,
+            'brand': brand,
+            'tier': tier,
+            'category': category,
+            'subcategory': subcategory
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/brands/subcategories', methods=['GET'])
+def get_subcategories_api():
+    """Get subcategories for a category"""
+    category = request.args.get('category', 'seating')
+    
+    try:
+        from utils.value_engineering import ValueEngineer
+        engineer = ValueEngineer()
+        subcategories = engineer.get_subcategories(category)
+        
+        return jsonify({
+            'success': True,
+            'subcategories': subcategories,
+            'category': category
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
