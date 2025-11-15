@@ -1438,49 +1438,116 @@
         
         .progress-bar {
             width: 100%;
-            height: 8px;
-            background: rgba(99, 102, 241, 0.1);
-            border-radius: 10px;
+            height: 30px;
+            background: linear-gradient(90deg, rgba(26, 54, 93, 0.3) 0%, rgba(26, 54, 93, 0.5) 100%);
+            border-radius: 20px;
             margin-top: 25px;
             overflow: hidden;
             display: none;
+            position: relative;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3), 0 4px 20px rgba(212, 175, 55, 0.2);
+            border: 2px solid rgba(212, 175, 55, 0.3);
         }
         
         .progress-fill {
             height: 100%;
-            background: #d4af37;
-            border-radius: 10px;
-            transition: width 0.3s ease;
-            text-align: center;
+            background: linear-gradient(90deg, #d4af37 0%, #f4d03f 50%, #d4af37 100%);
+            background-size: 200% 100%;
+            border-radius: 18px;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: #0f1419;
-            font-size: 0.8em;
-            font-weight: 600;
-            line-height: 8px;
-            box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
-            animation: shimmer 2s infinite;
+            font-size: 0.9em;
+            font-weight: 700;
+            position: relative;
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.8), inset 0 2px 10px rgba(255, 255, 255, 0.3);
+            animation: progressShimmer 2s linear infinite, progressPulse 1.5s ease-in-out infinite;
         }
         
-        @keyframes shimmer {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
+        @keyframes progressShimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        @keyframes progressPulse {
+            0%, 100% { box-shadow: 0 0 30px rgba(212, 175, 55, 0.8), inset 0 2px 10px rgba(255, 255, 255, 0.3); }
+            50% { box-shadow: 0 0 50px rgba(212, 175, 55, 1), inset 0 2px 10px rgba(255, 255, 255, 0.5); }
+        }
+        
+        .progress-fill::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, transparent 100%);
+            border-radius: 18px 18px 0 0;
+        }
+        
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 40px;
+            height: 100%;
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.6) 50%, transparent 100%);
+            animation: progressSweep 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes progressSweep {
+            0% { right: 100%; }
+            100% { right: -40px; }
+        }
+        
+        .progress-text {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+        
+        .progress-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(15, 20, 25, 0.3);
+            border-top-color: #0f1419;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
         }
         
         .file-list {
             min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
         
         .file-item {
-            background: #d4af37;
-            border: 1px solid rgba(99, 102, 241, 0.2);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(245, 247, 250, 0.95) 100%);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(212, 175, 55, 0.2);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 0;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.3s ease;
+            flex-direction: column;
+            gap: 20px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            animation: fileItemFadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fileItemFadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .file-item::before {
@@ -1488,58 +1555,210 @@
             position: absolute;
             left: 0;
             top: 0;
-            width: 4px;
+            width: 6px;
             height: 100%;
-            background: #d4af37;
-            transition: width 0.3s ease;
+            background: linear-gradient(180deg, #d4af37 0%, #f4d03f 100%);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+        }
+        
+        .file-item::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(212, 175, 55, 0.1) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
         }
         
         .file-item:hover {
-            transform: translateX(5px);
-            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.15);
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(212, 175, 55, 0.25);
+            border-color: rgba(212, 175, 55, 0.5);
         }
         
         .file-item:hover::before {
-            width: 8px;
+            width: 10px;
+        }
+        
+        .file-item:hover::after {
+            opacity: 1;
         }
         
         .file-info {
             flex: 1;
+            padding-right: 0;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(212, 175, 55, 0.2);
+            min-width: 0;
         }
         
         .file-name {
-            font-weight: 600;
-            font-size: 1.1em;
+            font-weight: 800;
+            font-size: 1.4em;
             color: #1a365d;
-            margin-bottom: 5px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            line-height: 1.4;
+            min-height: 40px;
+        }
+        
+        .file-name::before {
+            content: '📄';
+            font-size: 1.5em;
+            animation: iconFloat 3s ease-in-out infinite;
+            flex-shrink: 0;
+        }
+        
+        @keyframes iconFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-3px); }
+        }
+        
+        .file-name-text {
+            flex: 1;
+            word-break: break-word;
+            color: #1a365d;
+            font-size: 1em;
+            font-weight: 800;
+            min-height: 24px;
+            display: inline-block;
+            background: rgba(212, 175, 55, 0.1);
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+        
+        .file-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .file-size {
+            font-size: 0.85em;
+            color: #64748b;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .file-size::before {
+            content: '💾';
+            font-size: 1.1em;
         }
         
         .file-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: linear-gradient(135deg, rgba(100, 116, 139, 0.1) 0%, rgba(100, 116, 139, 0.2) 100%);
             color: #64748b;
-            font-size: 0.9em;
+            border: 1px solid rgba(100, 116, 139, 0.2);
+            transition: all 0.3s ease;
         }
+        
+        .file-status.status-uploaded {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.2) 100%);
+            color: #3b82f6;
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+        
+        .file-status.status-extracted {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.2) 100%);
+            color: #10b981;
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+        
+        .file-status.status-processing {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.2) 100%);
+            color: #92400e;
+            border-color: rgba(245, 158, 11, 0.3);
+            animation: statusPulse 2s ease-in-out infinite;
+            font-weight: 700;
+        }
+        
+        @keyframes statusPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); }
+        }
+        
+        .file-status::before {
+            content: '⚡';
+            font-size: 1.1em;
+        }
+        
+        .file-status.status-uploaded::before { content: '📤'; }
+        .file-status.status-extracted::before { content: '✅'; }
+        .file-status.status-processing::before { content: '⚙️'; animation: spin 2s linear infinite; }
         
         .file-actions {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
+            justify-content: flex-start;
+            padding-top: 5px;
         }
         
         .action-btn {
-            padding: 10px 18px;
+            padding: 12px 22px;
             border: none;
-            border-radius: 8px;
-            font-weight: 600;
+            border-radius: 12px;
+            font-weight: 700;
             font-size: 0.9em;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             color: #0f1419;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+        
+        .action-btn:hover::before {
+            width: 300px;
+            height: 300px;
         }
         
         .action-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .action-btn:active {
+            transform: translateY(-1px) scale(1.02);
+        }
+        
+        .action-btn > * {
+            position: relative;
+            z-index: 1;
         }
         
         .btn-primary {
@@ -1702,6 +1921,69 @@
         
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+        
+        /* Upload notification banner */
+        .upload-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, rgba(26, 54, 93, 0.98) 0%, rgba(45, 74, 124, 0.98) 100%);
+            backdrop-filter: blur(20px);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(212, 175, 55, 0.3);
+            z-index: 10000;
+            display: none;
+            animation: slideInRight 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            border-left: 4px solid #d4af37;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .upload-notification.show {
+            display: block;
+        }
+        
+        .upload-notification-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .upload-notification-icon {
+            font-size: 2em;
+            animation: iconBounce 0.6s ease;
+        }
+        
+        @keyframes iconBounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        
+        .upload-notification-text {
+            flex: 1;
+        }
+        
+        .upload-notification-title {
+            font-weight: 700;
+            font-size: 1.1em;
+            margin-bottom: 4px;
+        }
+        
+        .upload-notification-subtitle {
+            font-size: 0.9em;
+            opacity: 0.8;
         }
         
         .extraction-preview {
@@ -1918,9 +2200,17 @@
             
             <!-- Uploaded Files List -->
             <div class="card">
-                <h2>📋 Uploaded Files</h2>
+                <h2 style="display: flex; align-items: center; gap: 10px; margin-bottom: 25px;">
+                    <span>📋</span>
+                    <span>Uploaded Files</span>
+                    <span id="fileCount" style="font-size: 0.7em; background: #d4af37; color: #0f1419; padding: 4px 12px; border-radius: 12px; font-weight: 600;">0</span>
+                </h2>
                 <div class="file-list" id="fileList">
-                    <p style="text-align: center; color: #666;">No files uploaded yet</p>
+                    <div style="text-align: center; padding: 60px 20px; color: #64748b;">
+                        <div style="font-size: 4em; margin-bottom: 15px; opacity: 0.5;">📂</div>
+                        <p style="font-size: 1.1em; font-weight: 600; margin-bottom: 8px;">No files uploaded yet</p>
+                        <p style="font-size: 0.95em; opacity: 0.8;">Upload files to get started</p>
+                    </div>
                 </div>
             </div>
             
@@ -2043,6 +2333,17 @@
                 <h2>💰 Multi-Budget Options</h2>
                 <p style="color: #64748b; margin-bottom: 20px;">Generate multiple budget scenarios with value engineering. Works with or without costing applied.</p>
                 <button class="btn btn-info" onclick="valueEngineering()">💡 Value Engineering</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Upload Notification -->
+    <div class="upload-notification" id="uploadNotification">
+        <div class="upload-notification-content">
+            <div class="upload-notification-icon">📤</div>
+            <div class="upload-notification-text">
+                <div class="upload-notification-title" id="notificationTitle">File Uploaded!</div>
+                <div class="upload-notification-subtitle" id="notificationSubtitle">Processing...</div>
             </div>
         </div>
     </div>
@@ -2803,6 +3104,20 @@
             
             uploadProgress.style.display = 'block';
             
+            // Show upload notification
+            showUploadNotification('Uploading File', `${file.name}`, '⏳');
+            
+            // Create progress animation
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                if (progress < 90) {
+                    progress += Math.random() * 15;
+                    progress = Math.min(progress, 90);
+                    uploadProgressFill.style.width = progress + '%';
+                    uploadProgressFill.innerHTML = `<div class="progress-text"><div class="progress-spinner"></div><span>${Math.round(progress)}% Uploading...</span></div>`;
+                }
+            }, 200);
+            
             try {
                 const response = await fetch('/upload', {
                     method: 'POST',
@@ -2811,21 +3126,27 @@
                 
                 const result = await response.json();
                 
+                clearInterval(progressInterval);
+                
                 if (result.success) {
-                    showAlert('File uploaded successfully!', 'success');
                     uploadProgressFill.style.width = '100%';
-                    uploadProgressFill.textContent = '100%';
+                    uploadProgressFill.innerHTML = `<div class="progress-text"><span>✓</span><span>100% Complete!</span></div>`;
+                    showUploadNotification('Upload Complete!', `${file.name} ready for processing`, '✅');
                 } else {
-                    showAlert('Upload failed: ' + result.error, 'error');
+                    uploadProgressFill.style.width = '0%';
+                    showUploadNotification('Upload Failed', result.error, '❌');
                 }
             } catch (error) {
-                showAlert('Upload error: ' + error.message, 'error');
+                clearInterval(progressInterval);
+                uploadProgressFill.style.width = '0%';
+                showUploadNotification('Upload Error', error.message, '❌');
             }
             
             setTimeout(() => {
                 uploadProgress.style.display = 'none';
                 uploadProgressFill.style.width = '0%';
-            }, 2000);
+                uploadProgressFill.innerHTML = '';
+            }, 3000);
         }
         
         async function loadFileList() {
@@ -2835,17 +3156,39 @@
                 
                 console.log('Loading file list, received:', data);
                 
+                const fileCountBadge = document.getElementById('fileCount');
+                
                 if (data.files && data.files.length > 0) {
                     console.log('Found', data.files.length, 'files');
+                    
+                    // Update file count badge
+                    if (fileCountBadge) {
+                        fileCountBadge.textContent = data.files.length;
+                    }
+                    
                     fileList.innerHTML = '';
-                    data.files.forEach(file => {
-                        console.log('Adding file:', file.original_name);
+                    data.files.forEach((file, index) => {
+                        console.log('Adding file:', file.original_name, 'with ID:', file.id);
                         const fileItem = createFileItem(file);
+                        // Add staggered animation delay
+                        fileItem.style.animationDelay = `${index * 0.1}s`;
                         fileList.appendChild(fileItem);
                     });
                 } else {
                     console.log('No files found');
-                    fileList.innerHTML = '<p style="text-align: center; color: #666;">No files uploaded yet</p>';
+                    
+                    // Update file count badge
+                    if (fileCountBadge) {
+                        fileCountBadge.textContent = '0';
+                    }
+                    
+                    fileList.innerHTML = `
+                        <div style="text-align: center; padding: 60px 20px; color: #64748b;">
+                            <div style="font-size: 4em; margin-bottom: 15px; opacity: 0.5;">📂</div>
+                            <p style="font-size: 1.1em; font-weight: 600; margin-bottom: 8px;">No files uploaded yet</p>
+                            <p style="font-size: 0.95em; opacity: 0.8;">Upload files to get started</p>
+                        </div>
+                    `;
                 }
             } catch (error) {
                 console.error('Error loading files:', error);
@@ -2857,10 +3200,41 @@
             div.className = 'file-item';
             div.id = `file-${file.id}`;
             
+            console.log('Creating file item for:', file.original_name, 'ID:', file.id);
+            
+            // Determine status class
+            let statusClass = 'status-uploaded';
+            let statusText = 'Uploaded';
+            if (file.status === 'extracted') {
+                statusClass = 'status-extracted';
+                statusText = 'Extracted';
+            } else if (file.status === 'processing') {
+                statusClass = 'status-processing';
+                statusText = 'Processing';
+            }
+            
+            // Format file size if available
+            let fileSizeHtml = '';
+            if (file.size) {
+                const sizeKB = (file.size / 1024).toFixed(2);
+                const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                const displaySize = file.size > 1048576 ? `${sizeMB} MB` : `${sizeKB} KB`;
+                fileSizeHtml = `<div class="file-size">${displaySize}</div>`;
+            }
+            
+            const fileName = file.original_name || 'Unnamed File';
+            console.log('Setting file name to:', fileName);
+            
+            // Create the HTML structure with vertical layout
             div.innerHTML = `
-                <div class="file-info">
-                    <div class="file-name">${file.original_name}</div>
-                    <div class="file-status">Status: ${file.status}</div>
+                <div class="file-info" style="display: block; visibility: visible;">
+                    <div class="file-name" style="display: flex; visibility: visible; margin-bottom: 15px;">
+                        <span class="file-name-text">${fileName}</span>
+                    </div>
+                    <div class="file-meta" style="display: flex; visibility: visible;">
+                        <div class="file-status ${statusClass}">${statusText}</div>
+                        ${fileSizeHtml}
+                    </div>
                 </div>
                 <div class="file-actions">
                     <button class="action-btn btn-primary" onclick="extractTable('${file.id}')">🎯 Extract</button>
@@ -2869,6 +3243,17 @@
                     <button class="action-btn btn-danger" onclick="deleteFile('${file.id}')">🗑️ Delete</button>
                 </div>
             `;
+            
+            // Add mouse tracking for hover effect
+            div.addEventListener('mousemove', (e) => {
+                const rect = div.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+                div.style.setProperty('--mouse-x', x + '%');
+                div.style.setProperty('--mouse-y', y + '%');
+            });
+            
+            console.log('File item created, HTML:', div.innerHTML.substring(0, 200));
             
             return div;
         }
@@ -2891,6 +3276,13 @@
             extractionSection.style.display = 'block';
             extractionSection.innerHTML = '<div class="loading"></div> Extracting table data...';
             
+            // Update file status to processing
+            const fileStatusElem = document.querySelector(`#file-${fileId} .file-status`);
+            if (fileStatusElem) {
+                fileStatusElem.className = 'file-status status-processing';
+                fileStatusElem.textContent = 'Processing';
+            }
+            
             // Scroll to extracted tables section
             extractedTablesCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
             
@@ -2903,7 +3295,7 @@
                 
                 if (result.success) {
                     displayExtractionResult(fileId, result.result);
-                    showAlert('Extraction completed!', 'success');
+                    showAlert('Extraction completed! ✓', 'success');
                     
                     // Show download button
                     const downloadBtn = document.getElementById(`download-${fileId}`);
@@ -2912,11 +3304,9 @@
                     }
                     
                     // Update file status
-                    const fileStatusElem = document.querySelector(`#file-${fileId} .file-status`);
                     if (fileStatusElem) {
-                        fileStatusElem.textContent = 'Status: extracted';
-                        fileStatusElem.style.color = '#28a745';
-                        fileStatusElem.style.fontWeight = '600';
+                        fileStatusElem.className = 'file-status status-extracted';
+                        fileStatusElem.textContent = 'Extracted';
                     }
                     
                     // Automatically stitch tables after extraction
@@ -2925,9 +3315,19 @@
                     }, 500);
                 } else {
                     extractionSection.innerHTML = `<div class="alert-error">Error: ${result.error}</div>`;
+                    // Reset status to uploaded
+                    if (fileStatusElem) {
+                        fileStatusElem.className = 'file-status status-uploaded';
+                        fileStatusElem.textContent = 'Uploaded';
+                    }
                 }
             } catch (error) {
                 extractionSection.innerHTML = `<div class="alert-error">Error: ${error.message}</div>`;
+                // Reset status to uploaded
+                if (fileStatusElem) {
+                    fileStatusElem.className = 'file-status status-uploaded';
+                    fileStatusElem.textContent = 'Uploaded';
+                }
             }
         }
         
@@ -3147,6 +3547,24 @@
                 alert.style.animation = 'slideOut 0.3s ease-out';
                 setTimeout(() => alert.remove(), 300);
             }, 3000);
+        }
+        
+        // Upload notification function
+        function showUploadNotification(title, subtitle, icon = '📤') {
+            const notification = document.getElementById('uploadNotification');
+            const notificationTitle = document.getElementById('notificationTitle');
+            const notificationSubtitle = document.getElementById('notificationSubtitle');
+            const notificationIcon = notification.querySelector('.upload-notification-icon');
+            
+            notificationTitle.textContent = title;
+            notificationSubtitle.textContent = subtitle;
+            notificationIcon.textContent = icon;
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
         }
         
         // Generate Offer function

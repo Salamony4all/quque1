@@ -766,6 +766,32 @@ function resetTable(fileId) {
         if (table) {
             table.setAttribute('id', `table-${fileId}`);
             
+            // Make cells editable
+            table.querySelectorAll('td, th').forEach(cell => {
+                // Skip action column cells
+                if (!cell.classList.contains('action-column-header') && !cell.classList.contains('action-column-cell')) {
+                    cell.setAttribute('contenteditable', 'true');
+                    cell.setAttribute('ondrop', 'handleDrop(event)');
+                    cell.setAttribute('ondragover', 'handleDragOver(event)');
+                    
+                    const row = cell.parentElement;
+                    const bgColor = (row.rowIndex % 2 === 0) ? '#f8f9fa' : '';
+                    cell.setAttribute('onfocus', 'this.style.outline="2px solid #2196F3";this.style.backgroundColor="#fff9e6";');
+                    cell.setAttribute('onblur', `this.style.outline="none";this.style.backgroundColor="${bgColor}";`);
+                }
+            });
+            
+            // Add action buttons to all data rows (skip header)
+            for (let i = 1; i < table.rows.length; i++) {
+                const row = table.rows[i];
+                
+                // Check if action column already exists
+                const hasActionColumn = row.querySelector('.action-column-cell');
+                if (!hasActionColumn) {
+                    addActionButtonsToRow(row, fileId);
+                }
+            }
+            
             // Reapply images draggable
             table.querySelectorAll('img').forEach(img => {
                 img.setAttribute('draggable', 'true');
@@ -773,6 +799,9 @@ function resetTable(fileId) {
                 img.setAttribute('ondragend', 'handleDragEnd(event)');
                 img.style.cursor = 'move';
             });
+            
+            // Setup event delegation for action buttons
+            setupTableActionButtons(table, fileId);
         }
         
         showAlert('Table reset to original! 🔄', 'success');

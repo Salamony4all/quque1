@@ -573,6 +573,8 @@ def stitch_tables(file_id):
             pruned_result = layout_result.get('prunedResult', {})
             parsing_res_list = pruned_result.get('parsing_res_list', [])
             
+            logger.info(f'Processing page {page_idx + 1} with {len(parsing_res_list)} blocks')
+            
             for block in parsing_res_list:
                 if block.get('block_label') == 'table' and block.get('block_content'):
                     table_html = block['block_content']
@@ -587,35 +589,40 @@ def stitch_tables(file_id):
                         tbody_content = tbody_match.group(1)
                         rows = re.findall(r'<tr>(.*?)</tr>', tbody_content, re.DOTALL)
                         
+                        logger.info(f'Found {len(rows)} rows in table on page {page_idx + 1}')
+                        
                         if rows:
                             # First row is typically the header
                             first_row = rows[0]
                             
                             # Check if this is a header row (contains <th> or looks like a header)
-                            is_header = '<th>' in first_row or any(header_text in first_row.lower() for header_text in ['si.no', 'item', 'description', 'qty', 'unit', 'rate', 'amount', 'price'])
+                            is_header = '<th>' in first_row or is_header_row(first_row)
                             
-                            if main_header is None and is_header:
-                                # Store the main header from the first table
-                                main_header = first_row
-                                # Add all rows including header for first table
+                            if main_header is None:
+                                # First table - keep header and all data rows
+                                if is_header:
+                                    main_header = first_row
+                                    logger.info(f'Set main header from page {page_idx + 1}')
+                                # Add all rows from first table
                                 all_tables.extend(rows)
+                                logger.info(f'Added {len(rows)} rows from first table (page {page_idx + 1})')
                             else:
-                                # For subsequent tables, skip the header if it matches
+                                # Subsequent tables - skip header, add only data rows
                                 start_idx = 0
                                 if is_header and len(rows) > 1:
-                                    # Skip header row and any empty rows
-                                    for idx, row in enumerate(rows):
-                                        row_text = re.sub(r'<[^>]+>', '', row).strip()
-                                        if not row_text or is_header_row(row):
-                                            start_idx = idx + 1
-                                        else:
-                                            break
+                                    # Skip the header row
+                                    start_idx = 1
+                                    logger.info(f'Skipping header row on page {page_idx + 1}')
                                 
-                                # Add data rows only
-                                all_tables.extend(rows[start_idx:])
+                                # Add data rows
+                                data_rows = rows[start_idx:]
+                                all_tables.extend(data_rows)
+                                logger.info(f'Added {len(data_rows)} data rows from page {page_idx + 1}')
         
         if not all_tables:
             return jsonify({'error': 'No tables found to stitch'}), 400
+        
+        logger.info(f'Total rows after stitching: {len(all_tables)}')
         
         # Build the stitched table HTML
         stitched_html = '''
